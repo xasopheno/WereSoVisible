@@ -30,7 +30,12 @@ export default class App extends React.Component {
    */
   public render() {
     return (
-      <div className='three' ref={(el) => { this.three = el }} />
+      <div
+        className="three"
+        ref={el => {
+          this.three = el;
+        }}
+      />
     );
   }
 
@@ -48,8 +53,8 @@ export default class App extends React.Component {
     // window.addEventListener('resize', this.updateDimensions.bind(this));
 
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color( 0x050505 );
-    this.scene.fog = new THREE.Fog( 0x050505, 2000, 3500 );
+    this.scene.background = new THREE.Color(0x050505);
+    this.scene.fog = new THREE.Fog(0x050505, 2000, 3500);
     this.camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 5, 3500);
     this.camera.position.z = 2750;
 
@@ -71,16 +76,16 @@ export default class App extends React.Component {
       const x = Math.random() * n - n2;
       const y = Math.random() * n - n2;
       const z = Math.random() * n - n2;
-      positions.push( x, y, z );
+      positions.push(x, y, z);
       // colors
-      const vx = ( x / n ) + 0.5;
-      const vy = ( y / n ) + 0.5;
-      const vz = ( z / n ) + 0.5;
-      color.setRGB( vx, vy, vz );
-      colors.push( color.r, color.g, color.b );
+      const vx = x / n + 0.5;
+      const vy = y / n + 0.5;
+      const vz = z / n + 0.5;
+      color.setRGB(vx, vy, vz);
+      colors.push(color.r, color.g, color.b);
     }
-    geometry.addAttribute('position', new THREE.Float32BufferAttribute( positions, 3 ) );
-    geometry.addAttribute('color', new THREE.Float32BufferAttribute( colors, 3 ) );
+    geometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geometry.addAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
     geometry.computeBoundingSphere();
     //
     const material = new THREE.PointsMaterial({ size: 15, vertexColors: THREE.VertexColors });
