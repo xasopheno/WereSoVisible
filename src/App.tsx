@@ -1,4 +1,5 @@
 import React from 'react';
+import song from './bach';
 import * as THREE from 'three';
 
 export default class App extends React.Component {
@@ -13,9 +14,6 @@ export default class App extends React.Component {
   private material: any;
   private cube: any;
   private time: any;
-  /**
-   * Constructor
-   */
   constructor(props: any) {
     super(props);
 
@@ -24,10 +22,6 @@ export default class App extends React.Component {
       width: window.innerWidth,
     };
   }
-
-  /**
-   * Rendering
-   */
   public render() {
     return (
       <div
@@ -44,11 +38,12 @@ export default class App extends React.Component {
   //   this.camera.updateProjectionMatrix();
   //   this.renderer.setSize(window.innerWidth, window.innerHeight);
   // }
+  public readJson() {
+    return song.data;
+  }
 
-  /**
-   * Initialization
-   */
   public componentDidMount() {
+    const data = this.readJson();
     // this.updateDimensions();
     // window.addEventListener('resize', this.updateDimensions.bind(this));
 
@@ -56,7 +51,7 @@ export default class App extends React.Component {
     this.scene.background = new THREE.Color(0x050505);
     this.scene.fog = new THREE.Fog(0x050505, 2000, 3500);
     this.camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 5, 3500);
-    this.camera.position.z = 2750;
+    this.camera.position.z = 2550;
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -64,23 +59,20 @@ export default class App extends React.Component {
     this.three.appendChild(this.renderer.domElement);
 
     this.time = Date.now();
-    const particles = 10000;
     const geometry = new THREE.BufferGeometry();
     const positions = [];
     const colors = [];
     const color = new THREE.Color();
-    const n = 1000;
-    const n2 = n / 2; // particles spread in the cube
-    for (let i = 0; i < particles; i++) {
+    for (let i = 0; i < data.length; i++) {
       // positions
-      const x = Math.random() * n - n2;
-      const y = Math.random() * n - n2;
-      const z = Math.random() * n - n2;
+      const x = data[i].x * 10000.0 / data[i].voice;
+      const y = Math.log(data[i].y) * 100 - 500;
+      const z = data[i].t * 5;
       positions.push(x, y, z);
       // colors
-      const vx = x / n + 0.5;
-      const vy = y / n + 0.5;
-      const vz = z / n + 0.5;
+      const vx = data[i].y / 555.0;
+      const vy = data[i].voice / 85.0;
+      const vz = data[i].z;
       color.setRGB(vx, vy, vz);
       colors.push(color.r, color.g, color.b);
     }
@@ -96,24 +88,17 @@ export default class App extends React.Component {
     this.animate();
   }
 
-  /**
-   * Animation loop
-   */
   public animate() {
     requestAnimationFrame(this.animate.bind(this));
 
     this.time = Date.now() * 0.001;
-    this.points.rotation.x = this.time * 0.05;
-    this.points.rotation.y = this.time * 0.05;
+    // this.points.rotation.x = this.time * 0.5;
+    this.points.rotation.y = this.time * 0.3;
+    // this.points.rotation.y = 0.25;
     this.render();
     this.renderer.render(this.scene, this.camera);
   }
 
-  /**
-   * Resize operation handler, updating dimensions.
-   * Setting state will invalidate the component
-   * and call `componentWillUpdate()`.
-   */
   public updateDimensions() {
     this.setState({
       height: window.innerHeight,
@@ -121,9 +106,6 @@ export default class App extends React.Component {
     });
   }
 
-  /**
-   * Invalidation handler, updating layout
-   */
   public componentWillUpdate() {
     const width = window.innerWidth;
     const height = window.innerHeight;
