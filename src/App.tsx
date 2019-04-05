@@ -82,7 +82,7 @@ export default class App extends React.Component<Props, State> {
           // const rand = 4 * (Math.random() * 2 - 1);
           const rand = 1.0
 
-          object.position.x = point.x * 500 + rand;
+          object.position.x = point.x * 500 + rand - 200;
           object.position.y = Math.log(point.y) * 200 - 1000;
           object.position.z = point.t * 150 - 3500;
           // object.rotation.x = Math.random() * 2 * Math.PI;
@@ -99,19 +99,7 @@ export default class App extends React.Component<Props, State> {
     }
   }
 
-  public update_n() {
-      // this.setState({
-      //   ...this.state,
-      //   n: this.state.n + 1000,
-      // });
-    // if (this.state.n < this.data.length - 2000) {
-    //     console.log(this.state.n, this.data.length - 2000)
-    //     this.render_points();
-    //   }
-  }
-
   public componentDidMount = async () => {
-    this.interval = setInterval(() => this.update_n(), 100);
     this.data = await this.readJson();
     // this.updateDimensions();
     // window.addEventListener('resize', this.updateDimensions.bind(this));
@@ -127,7 +115,8 @@ export default class App extends React.Component<Props, State> {
     this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 10000);
     this.controls = new OrbitControls(this.camera);
 
-    this.camera.position.set(-4000, 1000, 0);
+    // this.camera.position.set(-4000, 1000, 0);
+    this.camera.position.set(-400, 100, 4500);
     this.controls.update();
 
     // this.camera.position.z = 600;
