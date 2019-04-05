@@ -62,7 +62,9 @@ export default class App extends React.Component<Props, State> {
   public readJson = async () => {
     return await song.data;
   }
-  public render_points() {
+
+
+  public render_points = async () => {
     // for (let i = this.state.n; i < this.state.n + 100; i++) {
     // for (let i = 0; i < this.data.length; i++) {
     //   const point = this.data[i];
@@ -79,8 +81,8 @@ export default class App extends React.Component<Props, State> {
 
           // const rand = point.voice * 0.2 * (Math.random() * 2) - 1; // * rand
           // const rand = point.voice * 0.01 * (Math.random() * 2) - 1;
-          // const rand = 4 * (Math.random() * 2 - 1);
-          const rand = 1.0
+          const rand = 2 * (Math.random() * 2 - 1);
+          // const rand = 1.0;
 
           object.position.x = point.x * 500 + rand - 200;
           object.position.y = Math.log(point.y) * 200 - 1000;
@@ -131,9 +133,7 @@ export default class App extends React.Component<Props, State> {
     this.scene.add(light);
     this.geometry = new THREE.BoxBufferGeometry(20, 20, 20);
 
-    console.log(this.data.length);
     this.render_points();
-    console.log(this.data.length);
 
     this.renderer = new THREE.WebGLRenderer();
     this.renderer.setPixelRatio(window.devicePixelRatio);
