@@ -3,15 +3,16 @@ import * as THREE from 'three';
 import song from './tokyo';
 const OrbitControls = require('three-orbit-controls')(THREE);
 
-interface Props {}
+// interface Props {}
 
 interface State {
   n: any;
   height: any;
   width: any;
+  audio: any;
 }
 
-export default class App extends React.Component<Props, State> {
+export default class App extends React.Component<{}, State> {
   private three: any;
   private scene: any;
   private camera: any;
@@ -28,51 +29,71 @@ export default class App extends React.Component<Props, State> {
   private controls: any;
   private data: any;
   private n: number;
+  private t: number;
+  private audio: any;
   private interval: any;
   constructor(props: any) {
     super(props);
-    this.theta = 0.0;
     this.n = 0;
+    this.t = 0.0;
 
     this.state = {
-      n: 0,
+      audio: null,
       height: window.innerHeight,
+      n: 0,
       width: window.innerWidth,
     };
   }
   public render(): any {
-    // const theta = 0.1;
-    // this.camera.position.x = radius * Math.sin( THREE.Math.degToRad( theta ) );
-    // this.camera.position.y = radius * Math.sin( THREE.Math.degToRad( theta ) );
-    // this.camera.position.z = radius * Math.cos( THREE.Math.degToRad( theta ) );
-    // this.camera.lookAt( this.scene.position );
-    // this.camera.updateMatrixWorld();
-    // // find intersections
-
-    // this.renderer.render( this.scene, this.camera );
-    return <div />;
+    return (
+      <div>
+        <div
+          onClick={() => this.start()}
+          style={{ position: 'absolute', backgroundColor: 'red' }}
+        >
+          <p style={{ paddingLeft: '5px', paddingRight: '5px', color: 'white', size: '14px' }}>Start</p>
+        </div>
+        <div style={{ touchAction: 'none' }} />
+      </div>
+    );
   }
 
-  // onWindowResize() {
-  //   this.camera.aspect = window.innerWidth / window.innerHeight;
-  //   this.camera.updateProjectionMatrix();
-  //   this.renderer.setSize(window.innerWidth, window.innerHeight);
+  // public getAudio = async () => {
+  //   this.setState({
+  //     ...this.state,
+  //     audio: audio,
+  //   });
   // }
+
 
   public readJson = async () => {
     return await song.data;
   }
 
+  public getPoints = () => {
+    const currentTime = (Date.now() - this.t) / 1000;
+    let go = true;
+    const points = [];
+    if (this.n < 0) {
+      this.n += 1;
+      return []
+    }
+    while (go === true) {
+      const point = this.data[this.n];
+      if (point.t < currentTime) {
+        points.push(point);
+        this.n += 1;
+      } else {
+        go = false;
+      }
+    }
+    return points;
+  }
 
-  public render_points = async () => {
-    // for (let i = this.state.n; i < this.state.n + 100; i++) {
-    // for (let i = 0; i < this.data.length; i++) {
-    //   const point = this.data[i];
-    const dl = this.data.length;
-    for (let i = 0; i < 300; i++) {
+  public renderPoints = () => {
+    const points = this.getPoints();
+    for (const point of points) {
       if (this.data.length > 0) {
-        let point = this.data.shift();
-        // console.log(point.t)
         if (point.z > 0.0 && point.y > 20.0 && point.event_type === 'On') {
           const object = new THREE.Mesh(
             this.geometry,
@@ -84,12 +105,10 @@ export default class App extends React.Component<Props, State> {
           const rand = 2 * (Math.random() * 2 - 1);
           // const rand = 1.0;
 
-          object.position.x = point.x * 500 + rand - 200;
+          object.position.x = point.x * 500 + rand;
           object.position.y = Math.log(point.y) * 200 - 1000;
-          object.position.z = point.t * 150 - 3500;
-          // object.rotation.x = Math.random() * 2 * Math.PI;
-          // object.rotation.y = Math.random() * 2 * Math.PI;
-          // object.rotation.z = Math.random() * 2 * Math.PI;
+          object.position.z = point.t * 150 - 1500;
+
           const scale = Math.exp(point.z) - 0.5;
           object.scale.x = scale;
           object.scale.y = scale;
@@ -101,10 +120,7 @@ export default class App extends React.Component<Props, State> {
     }
   }
 
-  public componentDidMount = async () => {
-    this.data = await this.readJson();
-    // this.updateDimensions();
-    // window.addEventListener('resize', this.updateDimensions.bind(this));
+  public setUpThreeJS = () => {
     this.container = document.createElement('div');
     document.body.appendChild(this.container);
     const info = document.createElement('div');
@@ -118,50 +134,50 @@ export default class App extends React.Component<Props, State> {
     this.controls = new OrbitControls(this.camera);
 
     // this.camera.position.set(-4000, 1000, 0);
-    this.camera.position.set(-400, 100, 4500);
+    // this.camera.position.set(-400, 100, 4500);
+    this.camera.position.set(1000, 100, 1000);
     this.controls.update();
-
-    // this.camera.position.z = 600;
 
     this.scene = new THREE.Scene();
     this.camera.lookAt(this.scene.position);
     this.scene.background = new THREE.Color(0x404040);
     const light = new THREE.AmbientLight(0xffffff); // soft white light
     this.scene.add(light);
-    // const light = new THREE.DirectionalLight( 0xffffff, 1 );
-    // light.position.set( 1, 1, 1 ).normalize();
     this.scene.add(light);
     this.geometry = new THREE.BoxBufferGeometry(20, 20, 20);
-
-    this.render_points();
 
     this.renderer = new THREE.WebGLRenderer();
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.render(this.scene, this.camera);
     this.container.appendChild(this.renderer.domElement);
+  }
+
+  public componentDidMount = async () => {
+    const url = 'http://localhost:9000/tokyo.mp3';
+    this.audio = await new Audio(url);
+    this.data = await this.readJson();
+
+    this.setUpThreeJS();
+    // this.updateDimensions();
+    window.addEventListener('resize', this.updateDimensions.bind(this));
 
     // window.addEventListener('resize', this.onWindowResize, false)
+  }
+
+  public start = () => {
+    this.t = Date.now();
+    this.audio.play();
     this.animate();
   }
 
   public animate() {
     requestAnimationFrame(this.animate.bind(this));
 
-    // this.theta += 0.1;
-    // this.camera.position.x = 100 * Math.sin( THREE.Math.degToRad( this.theta ) );
-    // this.camera.position.y = 100 * Math.sin( THREE.Math.degToRad( this.theta ) );
-    // this.camera.position.z = 100 * Math.cos( THREE.Math.degToRad( this.theta ) );
-    // this.camera.lookAt( this.scene.position );
-    // this.camera.updateMatrixWorld();
-    // this.time = Date.now() * 0.001;
-    // this.points.rotation.x = 0.01;
-    // this.points.rotation.y = this.time * 0.4;
-    // this.points.rotation.y = 0.25;
+    if (this.n < this.data.length) {
+      this.renderPoints();
+    }
 
-    // this.controls.update();
-
-    this.render_points();
     this.render();
     this.controls.update();
 
@@ -183,7 +199,6 @@ export default class App extends React.Component<Props, State> {
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
   }
-
   /**
    * Dipose
    */
