@@ -101,14 +101,14 @@ export default class App extends React.Component<{}, State> {
           const rand = 3 * (Math.random() * 2 - 1);
           // const rand = 1.0;
 
-          object.position.x = point.x * 600 + rand;
-          object.position.y = Math.log(point.y) * 400 - 2500;
-          object.position.z = point.t * 150 - 1500;
+          object.position.x = point.x * 800 + rand;
+          object.position.y = Math.log(point.y) * 500 - 3200;
+          object.position.z = point.t * 150 - 1500 + (point.l * 50);
 
           const scale = Math.exp(point.z) - 0.5;
           object.scale.x = scale;
           object.scale.y = scale;
-          object.scale.z = point.l * scale;
+          object.scale.z = point.l * 9;
 
           this.scene.add(object);
         }
@@ -131,14 +131,13 @@ export default class App extends React.Component<{}, State> {
 
     // this.camera.position.set(-4000, 1000, 0);
     // this.camera.position.set(-400, 100, 4500);
-    this.camera.position.set(1000, 100, 1000);
+    this.camera.position.set(3000, 400, 300);
     this.controls.update();
 
     this.scene = new THREE.Scene();
     this.camera.lookAt(this.scene.position);
     this.scene.background = new THREE.Color(0x404040);
     const light = new THREE.AmbientLight(0xffffff); // soft white light
-    this.scene.add(light);
     this.scene.add(light);
     this.geometry = new THREE.BoxBufferGeometry(20, 20, 20);
 
