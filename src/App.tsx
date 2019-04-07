@@ -74,13 +74,9 @@ export default class App extends React.Component<{}, State> {
     const currentTime = (Date.now() - this.t) / 1000;
     let go = true;
     const points = [];
-    if (this.n < 0) {
-      this.n += 1;
-      return []
-    }
     while (go === true) {
       const point = this.data[this.n];
-      if (point.t < currentTime) {
+      if (point && point.t < currentTime) {
         points.push(point);
         this.n += 1;
       } else {
@@ -102,11 +98,11 @@ export default class App extends React.Component<{}, State> {
 
           // const rand = point.voice * 0.2 * (Math.random() * 2) - 1; // * rand
           // const rand = point.voice * 0.01 * (Math.random() * 2) - 1;
-          const rand = 2 * (Math.random() * 2 - 1);
+          const rand = 3 * (Math.random() * 2 - 1);
           // const rand = 1.0;
 
-          object.position.x = point.x * 500 + rand;
-          object.position.y = Math.log(point.y) * 200 - 1000;
+          object.position.x = point.x * 600 + rand;
+          object.position.y = Math.log(point.y) * 400 - 2500;
           object.position.z = point.t * 150 - 1500;
 
           const scale = Math.exp(point.z) - 0.5;
@@ -159,17 +155,14 @@ export default class App extends React.Component<{}, State> {
     this.data = await this.readJson();
 
     this.setUpThreeJS();
-    // this.updateDimensions();
     window.addEventListener('resize', this.updateDimensions.bind(this));
-
-    // window.addEventListener('resize', this.onWindowResize, false)
   }
 
   public start = () => {
     this.t = Date.now();
     this.audio.play();
     this.animate();
-  }
+  };
 
   public animate() {
     requestAnimationFrame(this.animate.bind(this));
