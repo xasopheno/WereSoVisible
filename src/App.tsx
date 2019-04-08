@@ -105,12 +105,12 @@ export default class App extends React.Component<{}, State> {
 
           object.position.x = point.x * 800 + rand;
           object.position.y = Math.log(point.y) * 500 - 3200;
-          object.position.z = point.t * 150 - 1500 + (point.l * 50);
+          object.position.z = point.t * 150 - 1500 + point.l * 50;
 
           const scale = Math.exp(point.z) - 0.5;
           object.scale.x = scale;
           object.scale.y = scale;
-          this.tweenObject(object, point.l, point.t);
+          this.tweenObject(object, point.l);
           // object.scale.z = point.l * 9;
 
           this.scene.add(object);
@@ -119,12 +119,32 @@ export default class App extends React.Component<{}, State> {
     }
   }
 
-  public tweenObject(o: any, l: number, t: number) {
+  public tweenObject(o: any, l: number) {
     // TWEEN.removeAll();
-    new TWEEN.Tween(o.scale)
-      .to({ z: l * 9 }, t)
-      // .onUpdate( this.render )
+    new TWEEN.Tween({
+      scale: 0,
+      position: l / 4,
+    })
+      .to({
+        scale: l * 8,
+        position: 0,
+    }, l * 1000)
+      .onUpdate(function(this: any) {
+          // o.translate(0, 0, this.object.scale / l * 8);
+        // o.translateZ = this._object.scale;
+          o.scale.z = this._object.scale;
+          o.position.z = o.position.z - this._object.position;
+        }
+
+      )
       .start();
+    // new TWEEN.Tween(o)
+    //   .to({ scale: l * 9 }, t * 1000)
+    //   .onUpdate(() => {
+    //     o.scale.z = scale;
+    //   })
+    //   // .onUpdate( this.render )
+    //   .start();
   }
 
   public setUpThreeJS = () => {
