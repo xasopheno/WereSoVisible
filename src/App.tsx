@@ -1,6 +1,8 @@
 import React from 'react';
 import * as THREE from 'three';
 import song from './tokyo';
+import * as TWEEN from '@tweenjs/tween.js';
+
 const OrbitControls = require('three-orbit-controls')(THREE);
 
 // interface Props {}
@@ -108,12 +110,21 @@ export default class App extends React.Component<{}, State> {
           const scale = Math.exp(point.z) - 0.5;
           object.scale.x = scale;
           object.scale.y = scale;
-          object.scale.z = point.l * 9;
+          this.tweenObject(object, point.l, point.t);
+          // object.scale.z = point.l * 9;
 
           this.scene.add(object);
         }
       }
     }
+  }
+
+  public tweenObject(o: any, l: number, t: number) {
+    // TWEEN.removeAll();
+    new TWEEN.Tween(o.scale)
+      .to({ z: l * 9 }, t)
+      // .onUpdate( this.render )
+      .start();
   }
 
   public setUpThreeJS = () => {
@@ -165,6 +176,7 @@ export default class App extends React.Component<{}, State> {
 
   public animate() {
     requestAnimationFrame(this.animate.bind(this));
+    TWEEN.update();
 
     if (this.n < this.data.length) {
       this.renderPoints();
