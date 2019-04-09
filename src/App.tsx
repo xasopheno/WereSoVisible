@@ -1,7 +1,7 @@
+import * as TWEEN from '@tweenjs/tween.js';
 import React from 'react';
 import * as THREE from 'three';
 import song from './tokyo';
-import * as TWEEN from '@tweenjs/tween.js';
 
 const OrbitControls = require('three-orbit-controls')(THREE);
 
@@ -49,11 +49,10 @@ export default class App extends React.Component<{}, State> {
   public render(): any {
     return (
       <div>
-        <div
-          onClick={() => this.start()}
-          style={{ position: 'absolute', backgroundColor: 'red' }}
-        >
-          <p style={{ paddingLeft: '5px', paddingRight: '5px', color: 'white', size: '14px' }}>Start</p>
+        <div onClick={() => this.start()} style={{ position: 'absolute', backgroundColor: 'red' }}>
+          <p style={{ paddingLeft: '5px', paddingRight: '5px', color: 'white', size: '14px' }}>
+            Start
+          </p>
         </div>
         <div style={{ touchAction: 'none' }} />
       </div>
@@ -67,10 +66,9 @@ export default class App extends React.Component<{}, State> {
   //   });
   // }
 
-
   public readJson = async () => {
     return await song.data;
-  }
+  };
 
   public getPoints = () => {
     const currentTime = (Date.now() - this.t) / 1000;
@@ -86,7 +84,7 @@ export default class App extends React.Component<{}, State> {
       }
     }
     return points;
-  }
+  };
 
   public renderPoints = () => {
     const points = this.getPoints();
@@ -105,38 +103,51 @@ export default class App extends React.Component<{}, State> {
 
           object.position.x = point.x * 800 + rand;
           object.position.y = Math.log(point.y) * 500 - 3200;
-          object.position.z = point.t * 150 - 1500 + point.l * 50;
+          const time = point.t * 150 - 1500 + point.l * 50;
+          object.position.z = time;
 
           const scale = Math.exp(point.z) - 0.5;
-          object.scale.x = scale;
-          object.scale.y = scale;
-          this.tweenObject(object, point.l);
+          if (point.l < 0.3) {
+            object.scale.x = scale;
+            object.scale.y = scale;
+            object.scale.z = point.l * 8;
+          } else {
+            object.scale.x = 0;
+            object.scale.y = 0;
+            object.scale.z = 0;
+            this.tweenObject(object, point.l, time, scale);
+          }
           // object.scale.z = point.l * 9;
 
           this.scene.add(object);
         }
       }
     }
-  }
+  };
 
-  public tweenObject(o: any, l: number) {
+  public tweenObject(o: any, l: number, t: number, scale: number) {
     // TWEEN.removeAll();
     new TWEEN.Tween({
       scale: 0,
-      position: l / 4,
+      position: l * 80,
     })
-      .to({
-        scale: l * 8,
-        position: 0,
-    }, l * 1000)
-      .onUpdate(function(this: any) {
-          // o.translate(0, 0, this.object.scale / l * 8);
-        // o.translateZ = this._object.scale;
-          o.scale.z = this._object.scale;
-          o.position.z = o.position.z - this._object.position;
-        }
-
+      .to(
+        {
+          scale: l * 8,
+          position: 0,
+        },
+        l * 1000
       )
+      .easing(TWEEN.Easing.Sinusoidal.Out)
+      .onUpdate(function(this: any) {
+        // o.translate(0, 0, this.object.scale / l * 8);
+        // o.translateZ = this._object.scale;
+        o.scale.x = scale;
+        o.scale.y = scale;
+        o.scale.z = this._object.scale;
+        o.position.z = t - this._object.position + l * 2;
+        //   o.position.z = o.position.z - this._object.position;
+      })
       .start();
     // new TWEEN.Tween(o)
     //   .to({ scale: l * 9 }, t * 1000)
@@ -177,7 +188,7 @@ export default class App extends React.Component<{}, State> {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.render(this.scene, this.camera);
     this.container.appendChild(this.renderer.domElement);
-  }
+  };
 
   public componentDidMount = async () => {
     const url = 'http://localhost:9000/tokyo.mp3';
@@ -186,7 +197,7 @@ export default class App extends React.Component<{}, State> {
 
     this.setUpThreeJS();
     window.addEventListener('resize', this.updateDimensions.bind(this));
-  }
+  };
 
   public start = () => {
     this.t = Date.now();
