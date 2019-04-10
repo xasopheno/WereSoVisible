@@ -5,38 +5,46 @@ import * as THREE from 'three';
 const OrbitControls = require('three-orbit-controls')(THREE);
 
 interface State {
-  n: any;
-  height: any;
-  width: any;
-  audio: any;
+  n: number;
+  height: number;
+  width: number;
+}
+
+interface Point {
+  l: number;
+  t: number;
+  x: number;
+  y: number;
+  z: number;
+  event_type: string;
+  voice: number;
 }
 
 export default class App extends React.Component<{}, State> {
-  private scene: any;
-  private camera: any;
-  private renderer: any;
+  private scene!: THREE.Scene;
+  private camera!: THREE.PerspectiveCamera;
+  private renderer!: THREE.WebGLRenderer;
   private geometry: any;
-  private container: any;
-  private controls: any;
-  private data: any;
+  private container!: Element;
+  private controls!: any;
+  private songDataJson!: Point[];
   private n: number;
   private t: number;
-  private audio: any;
-  private song: any;
-  constructor(props: any) {
+  private audio!: HTMLAudioElement;
+  private song: string;
+  constructor(props: {}) {
     super(props);
     this.n = 0;
     this.t = 0.0;
     this.song = 'tokyo';
 
     this.state = {
-      audio: null,
       height: window.innerHeight,
       n: 0,
       width: window.innerWidth,
     };
   }
-  public render(): any {
+  public render() {
     return (
       <div>
         <div onClick={this.start} style={{ position: 'absolute', backgroundColor: 'red' }}>
@@ -49,7 +57,17 @@ export default class App extends React.Component<{}, State> {
     );
   }
 
-  public readJson = async () => {
+  public async componentDidMount() {
+    const url = `http://localhost:9000/${this.song}.mp3`;
+    this.audio = await new Audio(url);
+    this.songDataJson = await this.readJson();
+
+    this.setupContainer();
+    this.setUpThreeJS();
+    window.addEventListener('resize', this.updateDimensions.bind(this));
+  }
+
+  public readJson = async (): Promise<Point[]> => {
     const response = await fetch(`http://localhost:9000/${this.song}.json`);
     return response.json();
   };
@@ -59,7 +77,7 @@ export default class App extends React.Component<{}, State> {
     let go = true;
     const points = [];
     while (go === true) {
-      const point = this.data[this.n];
+      const point = this.songDataJson[this.n];
       if (point && point.t < currentTime) {
         points.push(point);
         this.n += 1;
@@ -73,42 +91,42 @@ export default class App extends React.Component<{}, State> {
   public renderPoints = () => {
     const points = this.getPoints();
     for (const point of points) {
-      if (this.data.length > 0) {
+      if (this.songDataJson.length > 0) {
         if (point.z > 0.0 && point.y > 20.0 && point.event_type === 'On') {
-          const object = new THREE.Mesh(
-            this.geometry,
-            new THREE.MeshLambertMaterial({ color: (point.voice / 50) * 0xffffff })
-          );
-
-          // const rand = point.voice * 0.2 * (Math.random() * 2) - 1; // * rand
-          // const rand = point.voice * 0.01 * (Math.random() * 2) - 1;
-          const rand = 3 * (Math.random() * 2 - 1);
-          // const rand = 1.0;
-
-          object.position.x = point.x * 1300 + rand;
-          object.position.y = Math.log(point.y) * 500 - 3200;
-          const time = point.t * 150 - 1500 + point.l * 50;
-          object.position.z = time;
-
-          const scale = Math.exp(point.z) - 0.5;
-          if (point.l < 0.3) {
-            object.scale.x = scale;
-            object.scale.y = scale;
-            object.scale.z = point.l * 8;
-          } else {
-            object.scale.x = 0;
-            object.scale.y = 0;
-            object.scale.z = 0;
-            this.tweenObject(object, point.l, time, scale);
-          }
-
+          const object = this.createObject(point);
           this.scene.add(object);
         }
       }
     }
   };
+  public createObject(point: Point): THREE.Mesh {
+    const object = new THREE.Mesh(
+      this.geometry,
+      new THREE.MeshLambertMaterial({ color: (point.voice / 50) * 0xffffff })
+    );
 
-  public tweenObject(o: any, l: number, t: number, scale: number) {
+    const rand = 3 * (Math.random() * 2 - 1);
+    const time = point.t * 150 - 1500 + point.l * 50;
+    const scale = Math.exp(point.z) - 0.5;
+    object.position.x = point.x * 1300 + rand;
+    object.position.y = Math.log(point.y) * 500 - 3200;
+    object.position.z = time;
+
+    if (point.l < 0.3) {
+      object.scale.x = scale;
+      object.scale.y = scale;
+      object.scale.z = point.l * 8;
+    } else {
+      object.scale.x = 0;
+      object.scale.y = 0;
+      object.scale.z = 0;
+      this.tweenObject(object, point.l, time, scale);
+    }
+
+    return object;
+  }
+
+  public tweenObject(o: THREE.Mesh, l: number, t: number, scale: number) {
     new TWEEN.Tween({
       position: l * 80,
       scale: 0,
@@ -161,21 +179,8 @@ export default class App extends React.Component<{}, State> {
     this.container.appendChild(this.renderer.domElement);
   }
 
-  public componentDidMount = async () => {
-    const url = `http://localhost:9000/${this.song}.mp3`;
-    this.audio = await new Audio(url);
-    this.data = await this.readJson();
-
-    this.setupContainer();
-    this.setUpThreeJS();
-    window.addEventListener('resize', this.updateDimensions.bind(this));
-  };
-
   public animate() {
-    requestAnimationFrame(this.animate.bind(this));
-    TWEEN.update();
-
-    if (this.n < this.data.length) {
+    if (this.n < this.songDataJson.length) {
       this.renderPoints();
     }
 
@@ -183,6 +188,8 @@ export default class App extends React.Component<{}, State> {
     this.controls.update();
 
     this.renderer.render(this.scene, this.camera);
+    requestAnimationFrame(this.animate.bind(this));
+    TWEEN.update();
   }
 
   public updateDimensions() {
@@ -207,7 +214,7 @@ export default class App extends React.Component<{}, State> {
     window.removeEventListener('resize', this.updateDimensions.bind(this));
   }
 
-  private start = () => {
+  public start = () => {
     this.t = Date.now();
     this.audio.play();
     this.animate();
