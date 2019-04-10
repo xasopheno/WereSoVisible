@@ -1,11 +1,8 @@
 import * as TWEEN from '@tweenjs/tween.js';
 import React from 'react';
 import * as THREE from 'three';
-import song from './tokyo';
 
 const OrbitControls = require('three-orbit-controls')(THREE);
-
-// interface Props {}
 
 interface State {
   n: any;
@@ -15,29 +12,22 @@ interface State {
 }
 
 export default class App extends React.Component<{}, State> {
-  private three: any;
   private scene: any;
   private camera: any;
   private renderer: any;
-  private points: any;
-  private directionalLight: any;
-  private hemisphereLight: any;
   private geometry: any;
-  private material: any;
-  private cube: any;
-  private time: any;
   private container: any;
-  private theta: any;
   private controls: any;
   private data: any;
   private n: number;
   private t: number;
   private audio: any;
-  private interval: any;
+  private song: any;
   constructor(props: any) {
     super(props);
     this.n = 0;
     this.t = 0.0;
+    this.song = 'tokyo';
 
     this.state = {
       audio: null,
@@ -49,7 +39,7 @@ export default class App extends React.Component<{}, State> {
   public render(): any {
     return (
       <div>
-        <div onClick={() => this.start()} style={{ position: 'absolute', backgroundColor: 'red' }}>
+        <div onClick={this.start} style={{ position: 'absolute', backgroundColor: 'red' }}>
           <p style={{ paddingLeft: '5px', paddingRight: '5px', color: 'white', size: '14px' }}>
             Start
           </p>
@@ -59,15 +49,9 @@ export default class App extends React.Component<{}, State> {
     );
   }
 
-  // public getAudio = async () => {
-  //   this.setState({
-  //     ...this.state,
-  //     audio: audio,
-  //   });
-  // }
-
   public readJson = async () => {
-    return await song.data;
+    const response = await fetch(`http://localhost:9000/${this.song}.json`);
+    return response.json();
   };
 
   public getPoints = () => {
@@ -101,7 +85,7 @@ export default class App extends React.Component<{}, State> {
           const rand = 3 * (Math.random() * 2 - 1);
           // const rand = 1.0;
 
-          object.position.x = point.x * 800 + rand;
+          object.position.x = point.x * 1300 + rand;
           object.position.y = Math.log(point.y) * 500 - 3200;
           const time = point.t * 150 - 1500 + point.l * 50;
           object.position.z = time;
@@ -117,7 +101,6 @@ export default class App extends React.Component<{}, State> {
             object.scale.z = 0;
             this.tweenObject(object, point.l, time, scale);
           }
-          // object.scale.z = point.l * 9;
 
           this.scene.add(object);
         }
@@ -126,39 +109,27 @@ export default class App extends React.Component<{}, State> {
   };
 
   public tweenObject(o: any, l: number, t: number, scale: number) {
-    // TWEEN.removeAll();
     new TWEEN.Tween({
-      scale: 0,
       position: l * 80,
+      scale: 0,
     })
       .to(
         {
-          scale: l * 8,
           position: 0,
+          scale: l * 8,
         },
         l * 1000
       )
       .easing(TWEEN.Easing.Sinusoidal.Out)
       .onUpdate(function(this: any) {
-        // o.translate(0, 0, this.object.scale / l * 8);
-        // o.translateZ = this._object.scale;
         o.scale.x = scale;
         o.scale.y = scale;
         o.scale.z = this._object.scale;
         o.position.z = t - this._object.position + l * 2;
-        //   o.position.z = o.position.z - this._object.position;
       })
       .start();
-    // new TWEEN.Tween(o)
-    //   .to({ scale: l * 9 }, t * 1000)
-    //   .onUpdate(() => {
-    //     o.scale.z = scale;
-    //   })
-    //   // .onUpdate( this.render )
-    //   .start();
   }
-
-  public setUpThreeJS = () => {
+  public setupContainer() {
     this.container = document.createElement('div');
     document.body.appendChild(this.container);
     const info = document.createElement('div');
@@ -167,12 +138,12 @@ export default class App extends React.Component<{}, State> {
     info.style.width = '100%';
     info.style.textAlign = 'center';
     this.container.appendChild(info);
+  }
 
+  public setUpThreeJS() {
     this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 10000);
     this.controls = new OrbitControls(this.camera);
 
-    // this.camera.position.set(-4000, 1000, 0);
-    // this.camera.position.set(-400, 100, 4500);
     this.camera.position.set(3000, 400, 300);
     this.controls.update();
 
@@ -188,21 +159,16 @@ export default class App extends React.Component<{}, State> {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.render(this.scene, this.camera);
     this.container.appendChild(this.renderer.domElement);
-  };
+  }
 
   public componentDidMount = async () => {
-    const url = 'http://localhost:9000/tokyo.mp3';
+    const url = `http://localhost:9000/${this.song}.mp3`;
     this.audio = await new Audio(url);
     this.data = await this.readJson();
 
+    this.setupContainer();
     this.setUpThreeJS();
     window.addEventListener('resize', this.updateDimensions.bind(this));
-  };
-
-  public start = () => {
-    this.t = Date.now();
-    this.audio.play();
-    this.animate();
   };
 
   public animate() {
@@ -240,4 +206,10 @@ export default class App extends React.Component<{}, State> {
   public componentWillUnmount() {
     window.removeEventListener('resize', this.updateDimensions.bind(this));
   }
+
+  private start = () => {
+    this.t = Date.now();
+    this.audio.play();
+    this.animate();
+  };
 }
