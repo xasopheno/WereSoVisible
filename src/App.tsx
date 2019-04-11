@@ -36,7 +36,7 @@ export default class App extends React.Component<{}, State> {
     super(props);
     this.n = 0;
     this.t = 0.0;
-    this.song = 'trisha_brown';
+    this.song = 'tokyo';
 
     this.state = {
       height: window.innerHeight,
