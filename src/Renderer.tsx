@@ -10,6 +10,10 @@ interface State {
   width: number;
 }
 
+interface Props {
+  song: string;
+}
+
 interface Point {
   l: number;
   t: number;
@@ -20,7 +24,7 @@ interface Point {
   voice: number;
 }
 
-export default class Renderer extends React.Component<{}, State> {
+export default class Renderer extends React.Component<Props, State> {
   private scene!: THREE.Scene;
   private camera!: THREE.PerspectiveCamera;
   private renderer!: THREE.WebGLRenderer;
@@ -32,11 +36,11 @@ export default class Renderer extends React.Component<{}, State> {
   private t: number;
   private audio!: HTMLAudioElement;
   private song: string;
-  constructor(props: {}) {
+  constructor(props: Props) {
     super(props);
     this.n = 0;
     this.t = 0.0;
-    this.song = 'tokyo';
+    this.song = this.props.song;
 
     this.state = {
       height: window.innerHeight,
@@ -155,13 +159,13 @@ export default class Renderer extends React.Component<{}, State> {
     })
       .to(
         {
-          position: t * 150,
+          position: t * 200,
         },
         t * 1000
       )
       .easing(TWEEN.Easing.Sinusoidal.InOut)
       .onUpdate(function(this: any) {
-        camera.position.z = camera.position.z + 1 / t * 150
+        camera.position.z = camera.position.z + 1 / t * 200
       })
       .start();
   }
@@ -182,7 +186,7 @@ export default class Renderer extends React.Component<{}, State> {
     this.controls = new OrbitControls(this.camera);
 
     // this.camera.position.set(3000, 400, 300);
-    this.camera.position.set(0, 0, 800);
+    this.camera.position.set(0, 0, 300);
     this.controls.update();
 
     this.scene = new THREE.Scene();
