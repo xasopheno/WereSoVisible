@@ -58,7 +58,7 @@ export default class App extends React.Component<{}, State> {
   }
 
   public async componentDidMount() {
-    const url = `http://localhost:9000/${this.song}.mp3`;
+    const url = `/${this.song}.mp3`;
     this.audio = await new Audio(url);
     this.songDataJson = await this.readJson();
 
@@ -68,7 +68,7 @@ export default class App extends React.Component<{}, State> {
   }
 
   public readJson = async (): Promise<Point[]> => {
-    const response = await fetch(`http://localhost:9000/${this.song}.json`);
+    const response = await fetch(`/${this.song}.socool.json`);
     return response.json();
   };
 

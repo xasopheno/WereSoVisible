@@ -17,8 +17,9 @@
     "three-orbit-controls": "^82.1.0",
     "typescript": "3.4.1"
   },
+  "proxy": "http://localhost:9000",
   "scripts": {
-    "start": "react-scripts --max-old-space-size=4096 start",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
@@ -38,6 +39,7 @@
     "tslint": "^5.14.0",
     "tslint-config-prettier": "^1.18.0",
     "tslint-plugin-prettier": "^2.0.1",
-    "tslint-react": "^4.0.0"
+    "tslint-react": "^4.0.0",
+    "webpack-cli": "^3.3.0"
   }
 }
