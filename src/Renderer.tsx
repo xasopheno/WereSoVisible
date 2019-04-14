@@ -168,7 +168,7 @@ export default class Renderer extends React.Component<Props, State> {
       )
       .easing(TWEEN.Easing.Sinusoidal.InOut)
       .onUpdate(function(this: any) {
-        camera.position.z = camera.position.z + 1 / t * 200
+        camera.position.z = camera.position.z + (1 / t) * 200;
       })
       .start();
   }
@@ -187,7 +187,7 @@ export default class Renderer extends React.Component<Props, State> {
   public setUpThreeJS() {
     this.scene = new THREE.Scene();
     this.renderer = new THREE.WebGLRenderer();
-    this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 10000);
+    this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 30000);
     this.controls = new OrbitControls(this.camera, this.container);
 
     this.camera.lookAt(this.scene.position);
