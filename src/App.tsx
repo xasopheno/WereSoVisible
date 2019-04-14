@@ -11,7 +11,7 @@ export default class App extends React.Component<{}, {}> {
   public render() {
     return (
       <div>
-        <Renderer song={'bach_prelude_3'} />
+        <Renderer song={'television'} />
       </div>
     );
   }

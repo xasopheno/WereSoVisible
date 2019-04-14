@@ -56,7 +56,6 @@ export default class Renderer extends React.Component<Props, State> {
             Start
           </p>
         </div>
-        <div style={{ touchAction: 'none' }} />
       </div>
     );
   }
@@ -69,7 +68,11 @@ export default class Renderer extends React.Component<Props, State> {
     this.setupContainer();
     this.setUpThreeJS();
     window.addEventListener('resize', this.updateDimensions.bind(this));
-    window.addEventListener('touchstart', function(e) { if (e.targetTouches.length === 2) { e.preventDefault(); } }, { passive: false } );
+    // window.addEventListener('handle', (e) => { if (e.targetTouches.length === 2) { e.preventDefault(); } }, { passive: false } );
+    // window.addEventListener('mousemove', (e) => {
+    //   console.log('here')
+    //   e.preventDefault(); }
+    //   );
   }
 
   public readJson = async (): Promise<Point[]> => {
@@ -182,24 +185,23 @@ export default class Renderer extends React.Component<Props, State> {
   }
 
   public setUpThreeJS() {
-    this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 10000);
-    this.controls = new OrbitControls(this.camera);
-
-    // this.camera.position.set(3000, 400, 300);
-    this.camera.position.set(0, 0, 300);
-    this.controls.update();
-
     this.scene = new THREE.Scene();
-    this.camera.lookAt(this.scene.position);
+    this.renderer = new THREE.WebGLRenderer();
+    this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 10000);
+    this.controls = new OrbitControls(this.camera, this.container);
 
-    this.tweenCamera(this.camera, this.songDataJson[this.songDataJson.length - 1].t);
+    this.camera.lookAt(this.scene.position);
+    this.camera.position.set(3000, 400, 300);
+    this.controls.update();
+    // this.camera.position.set(0, 0, 300);
+
+    // this.tweenCamera(this.camera, this.songDataJson[this.songDataJson.length - 1].t);
 
     this.scene.background = new THREE.Color(0x404040);
     const light = new THREE.AmbientLight(0xffffff); // soft white light
     this.scene.add(light);
     this.geometry = new THREE.BoxBufferGeometry(20, 20, 20);
 
-    this.renderer = new THREE.WebGLRenderer();
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.render(this.scene, this.camera);
