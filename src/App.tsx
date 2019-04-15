@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import Renderer from './Renderer';
 
 interface State {
@@ -6,9 +7,10 @@ interface State {
 }
 
 export default class App extends React.Component<{}, State> {
+  private renderSpace: HTMLDivElement | null;
   constructor(props: {}) {
     super(props);
-
+    this.renderSpace = null;
     this.state = {
       song: 'monica',
     };
@@ -17,14 +19,21 @@ export default class App extends React.Component<{}, State> {
   public render() {
     return (
       <div>
-        <Renderer song={this.state.song} />
+        <div ref={el => {this.renderSpace = el}} />
         {this.songSelect()}
       </div>
     );
   }
 
-  public updateSong = (e: React.FormEvent<HTMLSelectElement>) => {
-    const song: string = e.currentTarget.value;
+  public componentDidMount() {
+    this.updateSong(this.state.song);
+  }
+
+  public updateSong = (song: string) => {
+    if (this.renderSpace) {
+      ReactDOM.unmountComponentAtNode(this.renderSpace);
+      ReactDOM.render(<Renderer song={song} />, this.renderSpace);
+    }
     this.setState({
       song,
     });
@@ -37,12 +46,17 @@ export default class App extends React.Component<{}, State> {
           marginRight: '10px',
           position: 'absolute',
           right: '0',
+          top: '0',
         }}
       >
         <p>Song: </p>
-        <select onChange={this.updateSong} value={this.state.song}>
+        <select onChange={el => this.updateSong(el.target.value)} value={this.state.song}>
           {this.songNames().map((song, n) => {
-            return <option key={n} value={song}>{song}</option>;
+            return (
+              <option key={n} value={song}>
+                {song}
+              </option>
+            );
           })}
         </select>
       </div>

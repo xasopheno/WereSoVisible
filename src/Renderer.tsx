@@ -29,18 +29,23 @@ export default class Renderer extends React.Component<Props, State> {
   private camera!: THREE.PerspectiveCamera;
   private renderer!: THREE.WebGLRenderer;
   private geometry: any;
-  private container!: Element;
+  private container: Element | null;
   private controls!: any;
   private songDataJson!: Point[];
   private n: number;
   private t: number;
   private audio!: HTMLAudioElement;
   private song: string;
+  private play: boolean;
+  private id: number | null;
   constructor(props: Props) {
     super(props);
     this.n = 0;
     this.t = 0.0;
     this.song = this.props.song;
+    this.container = null;
+    this.play = true;
+    this.id = null;
 
     this.state = {
       height: window.innerHeight,
@@ -51,32 +56,30 @@ export default class Renderer extends React.Component<Props, State> {
   public render() {
     return (
       <div>
-        <div onClick={this.start} style={{ position: 'absolute', backgroundColor: 'red' }}>
+        <div onClick={this.start_render} style={{ position: 'absolute', backgroundColor: 'red' }}>
           <p style={{ paddingLeft: '5px', paddingRight: '5px', color: 'white', size: '14px' }}>
             Start
           </p>
         </div>
+        <div ref={el => {this.container = el}}></div>
       </div>
     );
   }
 
-  public async componentDidMount() {
-    const url = `/${this.song}.mp3`;
-    this.audio = await new Audio(url);
-    this.songDataJson = await this.readJson();
-
-    this.setupContainer();
-    this.setUpThreeJS();
-    window.addEventListener('resize', this.updateDimensions.bind(this));
-    // window.addEventListener('handle', (e) => { if (e.targetTouches.length === 2) { e.preventDefault(); } }, { passive: false } );
-    // window.addEventListener('mousemove', (e) => {
-    //   console.log('here')
-    //   e.preventDefault(); }
-    //   );
+  public async getData(song: string) {
+    const url = `/${song}.mp3`;
+    this.audio = new Audio(url);
+    this.songDataJson = await this.readJson(song);
   }
 
-  public readJson = async (): Promise<Point[]> => {
-    const response = await fetch(`/${this.song}.socool.json`);
+  public async componentDidMount() {
+    await this.getData(this.props.song);
+    this.setUpThreeJS();
+    window.addEventListener('resize', this.updateDimensions.bind(this));
+  }
+
+  public readJson = async (song: string): Promise<Point[]> => {
+    const response = await fetch(`/${song}.socool.json`);
     return response.json();
   };
 
@@ -84,7 +87,7 @@ export default class Renderer extends React.Component<Props, State> {
     const currentTime = (Date.now() - this.t) / 1000;
     let go = true;
     const points = [];
-    while (go === true) {
+    while (go) {
       const point = this.songDataJson[this.n];
       if (point && point.t < currentTime) {
         points.push(point);
@@ -176,16 +179,17 @@ export default class Renderer extends React.Component<Props, State> {
   public setupContainer() {
     this.container = document.createElement('div');
     document.body.appendChild(this.container);
-    const info = document.createElement('div');
-    info.style.position = 'absolute';
-    info.style.top = '10px';
-    info.style.width = '100%';
-    info.style.textAlign = 'center';
-    this.container.appendChild(info);
+  }
+
+  public setupScene() {
+    this.scene.background = new THREE.Color(0x404040);
+    const light = new THREE.AmbientLight(0xffffff); // soft white light
+    this.scene.add(light);
   }
 
   public setUpThreeJS() {
     this.scene = new THREE.Scene();
+    this.setupScene();
     this.renderer = new THREE.WebGLRenderer();
     this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 30000);
     this.controls = new OrbitControls(this.camera, this.container);
@@ -197,15 +201,14 @@ export default class Renderer extends React.Component<Props, State> {
 
     // this.tweenCamera(this.camera, this.songDataJson[this.songDataJson.length - 1].t);
 
-    this.scene.background = new THREE.Color(0x404040);
-    const light = new THREE.AmbientLight(0xffffff); // soft white light
-    this.scene.add(light);
     this.geometry = new THREE.BoxBufferGeometry(20, 20, 20);
 
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.render(this.scene, this.camera);
-    this.container.appendChild(this.renderer.domElement);
+    if (this.container) {
+      this.container.appendChild(this.renderer.domElement);
+    }
   }
 
   public animate() {
@@ -217,8 +220,10 @@ export default class Renderer extends React.Component<Props, State> {
     this.controls.update();
 
     this.renderer.render(this.scene, this.camera);
-    requestAnimationFrame(this.animate.bind(this));
-    TWEEN.update();
+    // if (this.play === true) {
+      this.id = requestAnimationFrame(this.animate.bind(this));
+      TWEEN.update();
+    // }
   }
 
   public updateDimensions() {
@@ -240,10 +245,15 @@ export default class Renderer extends React.Component<Props, State> {
    * Dipose
    */
   public componentWillUnmount() {
+    this.audio.pause();
+    if (this.id) {
+      window.cancelAnimationFrame(this.id);
+    }
     window.removeEventListener('resize', this.updateDimensions.bind(this));
   }
 
-  public start = () => {
+  public start_render = () => {
+    // this.play = true;
     this.t = Date.now();
     this.audio.play();
     this.animate();
