@@ -69,6 +69,7 @@ export default class App extends React.Component<{}, State> {
       'bach_fugue_1',
       'bach_prelude_2',
       'bach_prelude_3',
+      'hilbert',
       'home',
       'monica',
       'television',
