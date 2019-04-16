@@ -19,14 +19,19 @@ export default class App extends React.Component<{}, State> {
   public render() {
     return (
       <div>
-        <div ref={el => {this.renderSpace = el}} />
+        <div
+          ref={el => {
+            this.renderSpace = el;
+          }}
+        />
         {this.songSelect()}
       </div>
     );
   }
 
   public componentDidMount() {
-    this.updateSong(this.state.song);
+    const song: string = window.location.search.substring(1) || this.state.song;
+    this.updateSong(song);
   }
 
   public updateSong = (song: string) => {
@@ -37,6 +42,8 @@ export default class App extends React.Component<{}, State> {
     this.setState({
       song,
     });
+
+    window.history.pushState('', '', '/?' + song);
   };
 
   public songSelect() {

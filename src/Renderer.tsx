@@ -61,7 +61,11 @@ export default class Renderer extends React.Component<Props, State> {
             Start
           </p>
         </div>
-        <div ref={el => {this.container = el}}></div>
+        <div
+          ref={el => {
+            this.container = el;
+          }}
+        />
       </div>
     );
   }
@@ -221,8 +225,8 @@ export default class Renderer extends React.Component<Props, State> {
 
     this.renderer.render(this.scene, this.camera);
     // if (this.play === true) {
-      this.id = requestAnimationFrame(this.animate.bind(this));
-      TWEEN.update();
+    this.id = requestAnimationFrame(this.animate.bind(this));
+    TWEEN.update();
     // }
   }
 
