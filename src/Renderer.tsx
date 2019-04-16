@@ -56,7 +56,7 @@ export default class Renderer extends React.Component<Props, State> {
   public render() {
     return (
       <div>
-        <div onClick={this.start_render} style={{ position: 'absolute', backgroundColor: 'red' }}>
+        <div onClick={this.startRender} style={{ position: 'absolute', backgroundColor: 'red' }}>
           <p style={{ paddingLeft: '5px', paddingRight: '5px', color: 'white', size: '14px' }}>
             Start
           </p>
@@ -87,8 +87,7 @@ export default class Renderer extends React.Component<Props, State> {
     return response.json();
   };
 
-  public getPoints = () => {
-    const currentTime = (Date.now() - this.t) / 1000;
+  public getPoints = (currentTime: number) => {
     let go = true;
     const points = [];
     while (go) {
@@ -104,7 +103,8 @@ export default class Renderer extends React.Component<Props, State> {
   };
 
   public renderPoints = () => {
-    const points = this.getPoints();
+    const currentTime = (Date.now() - this.t) / 1000;
+    const points = this.getPoints(currentTime);
     for (const point of points) {
       if (this.songDataJson.length > 0) {
         if (point.z > 0.0 && point.y > 20.0 && point.event_type === 'On') {
@@ -163,7 +163,7 @@ export default class Renderer extends React.Component<Props, State> {
       .start();
   }
 
-  public tweenCamera(camera: THREE.PerspectiveCamera, t: number) {
+  public tweenCamera(camera: THREE.PerspectiveCamera, controls: any, t: number) {
     new TWEEN.Tween({
       position: 0,
     })
@@ -175,7 +175,8 @@ export default class Renderer extends React.Component<Props, State> {
       )
       .easing(TWEEN.Easing.Sinusoidal.InOut)
       .onUpdate(function(this: any) {
-        camera.position.z = camera.position.z + (1 / t) * 200;
+        camera.position.z = camera.position.z + (1 / t) * 70;
+        controls.target.z = controls.target.z + (1 / t) * 70;
       })
       .start();
   }
@@ -199,11 +200,10 @@ export default class Renderer extends React.Component<Props, State> {
     this.controls = new OrbitControls(this.camera, this.container);
 
     this.camera.lookAt(this.scene.position);
-    this.camera.position.set(3000, 400, 300);
+    this.camera.position.set(3000, 400, -100);
     this.controls.update();
+    this.tweenCamera(this.camera, this.controls, this.songDataJson[this.songDataJson.length - 1].t)
     // this.camera.position.set(0, 0, 300);
-
-    // this.tweenCamera(this.camera, this.songDataJson[this.songDataJson.length - 1].t);
 
     this.geometry = new THREE.BoxBufferGeometry(20, 20, 20);
 
@@ -245,9 +245,6 @@ export default class Renderer extends React.Component<Props, State> {
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
   }
-  /**
-   * Dipose
-   */
   public componentWillUnmount() {
     this.audio.pause();
     if (this.id) {
@@ -256,8 +253,7 @@ export default class Renderer extends React.Component<Props, State> {
     window.removeEventListener('resize', this.updateDimensions.bind(this));
   }
 
-  public start_render = () => {
-    // this.play = true;
+  public startRender = () => {
     this.t = Date.now();
     this.audio.play();
     this.animate();
