@@ -108,7 +108,7 @@ export default class Renderer extends React.Component<Props, State> {
     for (const point of points) {
       if (this.songDataJson.length > 0) {
         if (point.z > 0.0 && point.y > 20.0 && point.event_type === 'On') {
-          const object = this.createObject(point);
+          const object = this.createSprite(point);
           this.scene.add(object);
         }
       }
@@ -139,6 +139,23 @@ export default class Renderer extends React.Component<Props, State> {
     }
 
     return object;
+  }
+
+  public createSprite(point: Point): THREE.Sprite {
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ color: (point.voice / 50) * 0xffffff }) );
+    const rand = 3 * (Math.random() * 2 - 1);
+    const time = point.t * 150 - 1500 + point.l * 50;
+    const scale = Math.exp(point.z) - 0.5 * 50;
+    sprite.position.set(point.x * 1300 + rand, Math.log(point.y) * 500 - 3200, time);
+    // sprite.position.x = point.x * 1300 + rand;
+    // sprite.position.y = Math.log(point.y) * 500 - 3200;
+    // sprite.position.z = time;
+    sprite.scale.set(scale, scale, scale);
+    // sprite.scale.x = scale;
+    // sprite.scale.y = scale;
+    // sprite.scale.z = point.l * 8;
+
+    return sprite;
   }
 
   public tweenObject(o: THREE.Mesh, l: number, t: number, scale: number) {
