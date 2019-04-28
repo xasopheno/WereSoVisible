@@ -108,16 +108,18 @@ export default class Renderer extends React.Component<Props, State> {
     for (const point of points) {
       if (this.songDataJson.length > 0) {
         if (point.z > 0.0 && point.y > 20.0 && point.event_type === 'On') {
-          const object = this.createSprite(point);
+          const object = this.createObject(point);
           this.scene.add(object);
         }
       }
     }
   };
   public createObject(point: Point): THREE.Mesh {
+    const material = new THREE.MeshBasicMaterial({ color: (point.voice / 50) * 0xffffff })
+    // material.wireframe = true;
     const object = new THREE.Mesh(
       this.geometry,
-      new THREE.MeshLambertMaterial({ color: (point.voice / 50) * 0xffffff })
+      material
     );
 
     const rand = 3 * (Math.random() * 2 - 1);
