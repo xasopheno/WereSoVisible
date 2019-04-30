@@ -82,11 +82,9 @@ export default class App extends React.Component<{}, State> {
       'home',
       'lines',
       'monica',
-      // '23rd_St_and_6th_Avenue',
       'sketch',
       'television',
       'temecula',
-      // 'template',
       'tokyo',
       'trisha_brown',
     ];
