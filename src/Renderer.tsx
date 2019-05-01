@@ -35,9 +35,9 @@ export default class Renderer extends React.Component<Props, State> {
       uniform float time;
       
       void main() {
-          vec3 p = (gl_FragCoord.xyz) / 200.0; 
+          vec3 p = mod((gl_FragCoord.xyz), 2.0); 
           float r = fract(sin(dot(p.xyz ,vec3(12.9898,78.233, 24.3421))) * 43758.5453);
-          gl_FragColor = vec4(sin(colorA.r + r), sin(colorA.g + r), sin(colorA.b + r), 0.2);
+          gl_FragColor = vec4(sin(colorA.r + r), sin(colorA.g + r), sin(colorA.b + r), 0.03);
       }
   `;
   }
@@ -342,10 +342,10 @@ export default class Renderer extends React.Component<Props, State> {
       )
       .easing(TWEEN.Easing.Sinusoidal.InOut)
       .onUpdate(function(this: any) {
-        // camera.position.z = camera.position.z + (1 / t) * 70;
-        // controls.target.z = controls.target.z + (1 / t) * 70;
-        camera.position.z += this._object.position - camera.position.z + 1500;
-        controls.target.z += this._object.position - controls.target.z - 2000;
+        camera.position.z = camera.position.z + (1 / t) * 70;
+        controls.target.z = controls.target.z + (1 / t) * 70;
+        // camera.position.z += this._object.position - camera.position.z + 1500;
+        // controls.target.z += this._object.position - controls.target.z - 2000;
       })
       .start();
   }
