@@ -4,6 +4,7 @@ import Renderer from './Renderer';
 
 interface State {
   song: string;
+  songs: string[];
 }
 
 export default class App extends React.Component<{}, State> {
@@ -13,6 +14,7 @@ export default class App extends React.Component<{}, State> {
     this.renderSpace = null;
     this.state = {
       song: 'hilbert',
+      songs: [],
     };
   }
 
@@ -31,6 +33,7 @@ export default class App extends React.Component<{}, State> {
 
   public componentDidMount() {
     const song: string = window.location.search.substring(1) || this.state.song;
+    this.readJson();
     this.updateSong(song);
   }
 
@@ -58,7 +61,7 @@ export default class App extends React.Component<{}, State> {
       >
         <p>Song: </p>
         <select onChange={el => this.updateSong(el.target.value)} value={this.state.song}>
-          {this.songNames().map((song, n) => {
+          {this.state.songs.map((song, n) => {
             return (
               <option key={n} value={song}>
                 {song}
@@ -69,6 +72,13 @@ export default class App extends React.Component<{}, State> {
       </div>
     );
   }
+
+  public readJson = async () => {
+    const response = await fetch(`/songs/song_list.json`);
+    const json = await response.json();
+    const songs = json.songs;
+    this.setState({ songs });
+  };
 
   private songNames = (): string[] => {
     return [
