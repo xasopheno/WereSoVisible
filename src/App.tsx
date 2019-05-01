@@ -79,24 +79,4 @@ export default class App extends React.Component<{}, State> {
     const songs = json.songs;
     this.setState({ songs });
   };
-
-  private songNames = (): string[] => {
-    return [
-      'airplane',
-      'bach_fugue_1',
-      'bach_prelude_2',
-      'bach_prelude_3',
-      'herring',
-      'hilbert',
-      'ezra_the_sims',
-      'home',
-      'lines',
-      'monica',
-      'sketch',
-      'television',
-      'temecula',
-      'tokyo',
-      'trisha_brown',
-    ];
-  };
 }
