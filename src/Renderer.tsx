@@ -56,7 +56,7 @@ export default class Renderer extends React.Component<Props, State> {
   }
   private static calculateXPos(x: number): number {
     const rand = 3 * (Math.random() * 2 - 1);
-    return x * 1700 + rand;
+    return x * 1200 + rand;
   }
 
   private static calculateYPos(y: number): number {
@@ -340,11 +340,10 @@ export default class Renderer extends React.Component<Props, State> {
         },
         t * 1000
       )
-      .easing(TWEEN.Easing.Sinusoidal.InOut)
       .onUpdate(function(this: any) {
         // camera.position.z = camera.position.z + (1 / t) * 70;
         // controls.target.z = controls.target.z + (1 / t) * 70;
-        camera.position.z += this._object.position - camera.position.z + 1500;
+        camera.position.z += this._object.position - camera.position.z + 1000;
         controls.target.z += this._object.position - controls.target.z - 2000;
       })
       .start();
