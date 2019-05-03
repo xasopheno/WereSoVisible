@@ -8,6 +8,7 @@ const Controls = require('three-orbit-controls')(THREE);
 interface State {
   n: number;
   ready: boolean;
+  play: boolean;
   height: number;
   width: number;
 }
@@ -35,9 +36,9 @@ export default class Renderer extends React.Component<Props, State> {
       uniform float time;
       
       void main() {
-          vec3 p = mod((gl_FragCoord.xyz), 2.0); 
+          vec3 p = mod((gl_FragCoord.xyz), 100.0); 
           float r = fract(sin(dot(p.xyz ,vec3(12.9898,78.233, 24.3421))) * 43758.5453);
-          gl_FragColor = vec4(sin(colorA.r + r), sin(colorA.g + r), sin(colorA.b + r), 0.03);
+          gl_FragColor = vec4(sin(colorA.r + r), sin(colorA.g + r) - 0.05, sin(colorA.b + r), 0.03);
       }
   `;
   }
@@ -56,7 +57,7 @@ export default class Renderer extends React.Component<Props, State> {
   }
   private static calculateXPos(x: number): number {
     const rand = 3 * (Math.random() * 2 - 1);
-    return x * 1200 + rand;
+    return -((x * 4) / (5 * window.innerWidth)) + rand;
   }
 
   private static calculateYPos(y: number): number {
@@ -76,19 +77,18 @@ export default class Renderer extends React.Component<Props, State> {
   private n: number;
   private t: number;
   private audio!: HTMLAudioElement;
-  private play: boolean;
   private id: number | null;
   constructor(props: Props) {
     super(props);
     this.n = 0;
     this.t = 0.0;
     this.container = null;
-    this.play = true;
     this.id = null;
 
     this.state = {
       height: window.innerHeight,
       n: 0,
+      play: false,
       ready: false,
       width: window.innerWidth,
     };
@@ -110,10 +110,16 @@ export default class Renderer extends React.Component<Props, State> {
     this.t = Date.now();
     this.audio.play();
     this.animate();
+    this.setState({
+      ...this.state,
+      play: true,
+    });
   };
 
   public renderStartButton = () => {
-    if (this.state.ready) {
+    if (this.state.play && this.state.ready) {
+      return;
+    } else if (this.state.ready) {
       return (
         <div onClick={this.startAnimation} style={{ position: 'absolute', backgroundColor: 'red' }}>
           <p style={{ paddingLeft: '5px', paddingRight: '5px', color: 'white', size: '14px' }}>
@@ -158,8 +164,8 @@ export default class Renderer extends React.Component<Props, State> {
 
   public setupScene() {
     this.scene.background = new THREE.Color(0x404040);
-    const light = new THREE.AmbientLight(0xffffff);
-    this.scene.add(light);
+    // const light = new THREE.AmbientLight(0xffaa00);
+    // this.scene.add(light);
   }
 
   public setUpThreeJS() {
@@ -274,7 +280,7 @@ export default class Renderer extends React.Component<Props, State> {
     const object = new THREE.Mesh(this.geometry, material);
 
     const time = point.t * 150 - 1500 + point.l * 50;
-    const scale = Math.exp(point.z) - 0.5;
+    const scale = Math.exp(point.z) - 0.15;
     object.position.x = Renderer.calculateXPos(point.x);
     object.position.y = Renderer.calculateYPos(point.y);
     object.position.z = Renderer.calculateZPos(point.t, point.l);
