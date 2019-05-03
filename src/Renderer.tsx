@@ -57,7 +57,7 @@ export default class Renderer extends React.Component<Props, State> {
   }
   private static calculateXPos(x: number): number {
     const rand = 3 * (Math.random() * 2 - 1);
-    return -((x * 4) / (5 * window.innerWidth)) + rand;
+    return -(((x * 4) / 5) * window.innerWidth) + rand;
   }
 
   private static calculateYPos(y: number): number {
