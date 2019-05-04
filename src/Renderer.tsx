@@ -36,9 +36,22 @@ export default class Renderer extends React.Component<Props, State> {
       uniform float time;
       
       void main() {
-          vec3 p = mod((gl_FragCoord.xyz), 100.0); 
-          float r = fract(sin(dot(p.xyz ,vec3(12.9898,78.233, 24.3421))) * 43758.5453);
-          gl_FragColor = vec4(sin(colorA.r + r), sin(colorA.g + r) - 0.05, sin(colorA.b + r), 0.03);
+          vec3 p = mod(
+            gl_FragCoord.xyz, 100.0
+          ); 
+          float r = fract(
+            sin(
+              dot(
+                p.xyz ,
+                vec3(12.9898,78.233, 24.3421)
+              )
+            ) * 43758.5453
+          );
+          gl_FragColor = vec4(
+            sin(colorA.r + r), 
+            sin(colorA.g + r) - 0.05, 
+            sin(colorA.b + r), 0.03
+          );
       }
   `;
   }
