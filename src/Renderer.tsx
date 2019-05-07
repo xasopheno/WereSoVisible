@@ -50,6 +50,7 @@ export default class Renderer extends React.Component<Props, State> {
           gl_FragColor = vec4(
             sin(colorA.r + r), 
             sin(colorA.g + r) - 0.05, 
+            // sin(colorA.g + r) - 0.25, 
             sin(colorA.b + r), 0.03
           );
       }
@@ -362,7 +363,7 @@ export default class Renderer extends React.Component<Props, State> {
       .onUpdate(function(this: any) {
         // camera.position.z = camera.position.z + (1 / t) * 70;
         // controls.target.z = controls.target.z + (1 / t) * 70;
-        camera.position.z += this._object.position - camera.position.z + 1000;
+        camera.position.z += this._object.position - camera.position.z + 1200;
         controls.target.z += this._object.position - controls.target.z - 2000;
       })
       .start();
