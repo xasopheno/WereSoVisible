@@ -60,11 +60,12 @@ export default class Renderer extends React.Component<Props, State> {
   private static vertexShader() {
     return `
     varying vec3 vUv; 
+    uniform float time;
 
     void main() {
       vUv = position; 
 
-      vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
+      vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0) * vec4(1.0, 1.0 + sin(time * position.y), 1.0, 1.0);
       gl_Position = projectionMatrix * modelViewPosition; 
     }
   `;
@@ -280,7 +281,9 @@ export default class Renderer extends React.Component<Props, State> {
   };
 
   public createObject(point: Point): THREE.Mesh {
+    const ta = 3.0;
     const uniforms = {
+      ta: { type: 'f', value: ta },
       colorA: { type: 'vec3', value: new THREE.Color((point.voice / 50) * 0xffffff) },
       colorB: { type: 'vec3', value: new THREE.Color((point.voice / 50) * 0xffffee) },
     };
@@ -294,7 +297,7 @@ export default class Renderer extends React.Component<Props, State> {
     const object = new THREE.Mesh(this.geometry, material);
 
     const time = point.t * 150 - 1500 + point.l * 50;
-    const scale = Math.exp(point.z) - 0.15;
+    const scale = Math.exp(point.z);
     object.position.x = Renderer.calculateXPos(point.x);
     object.position.y = Renderer.calculateYPos(point.y);
     object.position.z = Renderer.calculateZPos(point.t, point.l);
@@ -363,7 +366,7 @@ export default class Renderer extends React.Component<Props, State> {
       .onUpdate(function(this: any) {
         // camera.position.z = camera.position.z + (1 / t) * 70;
         // controls.target.z = controls.target.z + (1 / t) * 70;
-        camera.position.z += this._object.position - camera.position.z + 1200;
+        camera.position.z += this._object.position - camera.position.z + 2300;
         controls.target.z += this._object.position - controls.target.z - 2000;
       })
       .start();
