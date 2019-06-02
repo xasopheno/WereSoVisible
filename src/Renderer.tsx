@@ -108,6 +108,8 @@ export default class Renderer extends React.Component<Props, State> {
       width: window.innerWidth,
     };
   }
+
+
   public render() {
     return (
       <div>
@@ -125,6 +127,8 @@ export default class Renderer extends React.Component<Props, State> {
     this.t = Date.now();
     this.audio.play();
     this.animate();
+    const last = this.songDataJson[this.songDataJson.length - 1];
+    this.tweenCamera(this.camera, this.controls, last.t, last.l);
     this.setState({
       ...this.state,
       play: true,
@@ -136,7 +140,7 @@ export default class Renderer extends React.Component<Props, State> {
       return;
     } else if (this.state.ready) {
       return (
-        <div onClick={this.startAnimation} style={{ position: 'absolute', backgroundColor: 'red' }}>
+        <div onClick={this.startAnimation} style={{ position: 'absolute', backgroundColor: 'red', top: '40px', right: '10px' }}>
           <p style={{ paddingLeft: '5px', paddingRight: '5px', color: 'white', size: '14px' }}>
             Start
           </p>
@@ -144,7 +148,7 @@ export default class Renderer extends React.Component<Props, State> {
       );
     } else {
       return (
-        <div style={{ position: 'absolute', backgroundColor: 'Blue' }}>
+        <div style={{ position: 'absolute', backgroundColor: 'blue', top: '40px', right: '10px' }}>
           <p style={{ paddingLeft: '5px', paddingRight: '5px', color: 'white', size: '14px' }}>
             Wait.
           </p>
@@ -161,6 +165,11 @@ export default class Renderer extends React.Component<Props, State> {
       ready: true,
     });
     window.addEventListener('resize', this.updateDimensions.bind(this));
+    window.addEventListener('keydown', e => {
+      if (this.state.ready && !this.state.play && e.code === 'Space') {
+        this.startAnimation();
+      }
+    });
   }
 
   public componentWillUpdate() {
@@ -170,11 +179,6 @@ export default class Renderer extends React.Component<Props, State> {
     this.renderer.setSize(width, height);
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
-  }
-
-  public setupContainer() {
-    this.container = document.createElement('div');
-    document.body.appendChild(this.container);
   }
 
   public setupScene() {
@@ -193,8 +197,6 @@ export default class Renderer extends React.Component<Props, State> {
     this.camera.lookAt(this.scene.position);
     this.camera.position.set(0, 0, 500);
     this.controls.update();
-    const last = this.songDataJson[this.songDataJson.length - 1];
-    this.tweenCamera(this.camera, this.controls, last.t, last.l);
 
     this.geometry = new THREE.BoxBufferGeometry(20, 20, 20);
 
@@ -265,10 +267,6 @@ export default class Renderer extends React.Component<Props, State> {
           let object;
           // if (
           //   point.l > 0.3 ||
-          //   this.props.song === 'bach_prelude_2' ||
-          //   this.props.song === 'bach_prelude_3' ||
-          //   this.props.song === 'template' ||
-          //   this.props.song === 'bach_fugue_1'
           // ) {
           object = this.createObject(point);
           // } else {
@@ -283,9 +281,9 @@ export default class Renderer extends React.Component<Props, State> {
   public createObject(point: Point): THREE.Mesh {
     const ta = 3.0;
     const uniforms = {
-      ta: { type: 'f', value: ta },
       colorA: { type: 'vec3', value: new THREE.Color((point.voice / 50) * 0xffffff) },
       colorB: { type: 'vec3', value: new THREE.Color((point.voice / 50) * 0xffffee) },
+      ta: { type: 'f', value: ta },
     };
 
     const material = new THREE.ShaderMaterial({

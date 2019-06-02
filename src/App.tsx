@@ -56,10 +56,9 @@ export default class App extends React.Component<{}, State> {
           marginRight: '10px',
           position: 'absolute',
           right: '0',
-          top: '0',
+          top: '10px',
         }}
       >
-        <p>Song: </p>
         <select onChange={el => this.updateSong(el.target.value)} value={this.state.song}>
           {this.state.songs.map((song, n) => {
             return (
