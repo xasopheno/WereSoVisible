@@ -167,6 +167,21 @@ export default class Renderer extends React.Component<Props, State> {
     window.addEventListener('resize', this.updateDimensions.bind(this));
     window.addEventListener('keydown', e => {
       if (this.state.ready && !this.state.play && e.code === 'Space') {
+        e.preventDefault();
+        this.startAnimation();
+      }
+    });
+  }
+
+  public componentWillUnmount() {
+    this.audio.pause();
+    if (this.id) {
+      window.cancelAnimationFrame(this.id);
+    }
+    window.removeEventListener('resize', this.updateDimensions.bind(this));
+    window.removeEventListener('keydown', e => {
+      if (this.state.ready && !this.state.play && e.code === 'Space') {
+        e.preventDefault();
         this.startAnimation();
       }
     });
@@ -227,13 +242,6 @@ export default class Renderer extends React.Component<Props, State> {
     });
   }
 
-  public componentWillUnmount() {
-    this.audio.pause();
-    if (this.id) {
-      window.cancelAnimationFrame(this.id);
-    }
-    window.removeEventListener('resize', this.updateDimensions.bind(this));
-  }
 
   public async getData(song: string) {
     const url = `/songs/${song}.mp3`;
