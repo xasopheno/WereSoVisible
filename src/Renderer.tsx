@@ -32,7 +32,7 @@ export default class Renderer extends React.Component<Props, State> {
     return `
       uniform vec3 colorA; 
       uniform vec3 colorB; 
-      varying vec3 vUv;
+      // varying vec3 vUv;
       uniform float time;
       
       void main() {
@@ -59,11 +59,11 @@ export default class Renderer extends React.Component<Props, State> {
 
   private static vertexShader() {
     return `
-    varying vec3 vUv; 
+    // varying vec3 vUv; 
     uniform float time;
 
     void main() {
-      vUv = position; 
+      // vUv = position; 
 
       vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0) * vec4(1.0, 1.0 + sin(time * position.y), 1.0, 1.0);
       gl_Position = projectionMatrix * modelViewPosition; 
@@ -71,8 +71,8 @@ export default class Renderer extends React.Component<Props, State> {
   `;
   }
   private static calculateXPos(x: number): number {
-    const rand = 3 * (Math.random() * 2 - 1);
-    return -(((x * 4) / 5) * window.innerWidth) + rand;
+    // const rand = 3 * (Math.random() * 2 - 1);
+    return -(x * 4 * window.innerWidth);
   }
 
   private static calculateYPos(y: number): number {
@@ -109,7 +109,6 @@ export default class Renderer extends React.Component<Props, State> {
     };
   }
 
-
   public render() {
     return (
       <div>
@@ -140,7 +139,10 @@ export default class Renderer extends React.Component<Props, State> {
       return;
     } else if (this.state.ready) {
       return (
-        <div onClick={this.startAnimation} style={{ position: 'absolute', backgroundColor: 'red', top: '40px', right: '10px' }}>
+        <div
+          onClick={this.startAnimation}
+          style={{ position: 'absolute', backgroundColor: 'red', top: '40px', right: '10px' }}
+        >
           <p style={{ paddingLeft: '5px', paddingRight: '5px', color: 'white', size: '14px' }}>
             Start
           </p>
@@ -210,7 +212,7 @@ export default class Renderer extends React.Component<Props, State> {
     this.controls = new Controls(this.camera, this.container);
 
     this.camera.lookAt(this.scene.position);
-    this.camera.position.set(0, 0, 500);
+    this.camera.position.set(0, 0, 2300);
     this.controls.update();
 
     this.geometry = new THREE.BoxBufferGeometry(20, 20, 20);
@@ -241,7 +243,6 @@ export default class Renderer extends React.Component<Props, State> {
       width: window.innerWidth,
     });
   }
-
 
   public async getData(song: string) {
     const url = `/songs/${song}.mp3`;
@@ -302,7 +303,7 @@ export default class Renderer extends React.Component<Props, State> {
     // const material = new THREE.MeshLambertMaterial({ color: (point.voice / 50) * 0xffffff });
     const object = new THREE.Mesh(this.geometry, material);
 
-    const time = point.t * 150 - 1500 + point.l * 50;
+    const time = point.t * 100 - 1000 + point.l * 100;
     const scale = Math.exp(point.z);
     object.position.x = Renderer.calculateXPos(point.x);
     object.position.y = Renderer.calculateYPos(point.y);
@@ -373,7 +374,7 @@ export default class Renderer extends React.Component<Props, State> {
         // camera.position.z = camera.position.z + (1 / t) * 70;
         // controls.target.z = controls.target.z + (1 / t) * 70;
         camera.position.z += this._object.position - camera.position.z + 2300;
-        controls.target.z += this._object.position - controls.target.z - 2000;
+        controls.target.z += this._object.position - controls.target.z - 500;
       })
       .start();
   }
