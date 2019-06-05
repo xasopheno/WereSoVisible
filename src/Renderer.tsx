@@ -72,11 +72,12 @@ export default class Renderer extends React.Component<Props, State> {
   }
   private static calculateXPos(x: number): number {
     // const rand = 3 * (Math.random() * 2 - 1);
+
     return -(x * 4 * window.innerWidth);
   }
 
   private static calculateYPos(y: number): number {
-    return Math.log(y) * 500 - 3200;
+    return Math.log(y + 0.001) * 2/3 * window.innerHeight + window.innerHeight * 5/2;
   }
 
   private static calculateZPos(t: number, l: number): number {
@@ -212,7 +213,7 @@ export default class Renderer extends React.Component<Props, State> {
     this.controls = new Controls(this.camera, this.container);
 
     this.camera.lookAt(this.scene.position);
-    this.camera.position.set(0, 0, 2300);
+    this.camera.position.set(0, 0, 0);
     this.controls.update();
 
     this.geometry = new THREE.BoxBufferGeometry(20, 20, 20);
@@ -272,17 +273,15 @@ export default class Renderer extends React.Component<Props, State> {
     const points = this.getPoints(currentTime);
     for (const point of points) {
       if (this.songDataJson.length > 0) {
-        if (point.z > 0.0 && point.y > 20.0 && point.event_type === 'On') {
-          let object;
-          // if (
-          //   point.l > 0.3 ||
-          // ) {
-          object = this.createObject(point);
-          // } else {
-          //   object = this.createSprite(point);
-          // }
-          this.scene.add(object);
-        }
+        let object;
+        // if (
+        //   point.l > 0.3 ||
+        // ) {
+        object = this.createObject(point);
+        // } else {
+        //   object = this.createSprite(point);
+        // }
+        this.scene.add(object);
       }
     }
   };
@@ -361,12 +360,13 @@ export default class Renderer extends React.Component<Props, State> {
   }
 
   public tweenCamera(camera: THREE.PerspectiveCamera, controls: any, t: number, l: number) {
+    const lm = 600;
     new TWEEN.Tween({
       position: 0,
     })
       .to(
         {
-          position: Renderer.calculateZPos(t, l),
+          position: Renderer.calculateZPos(t + l * 20, l),
         },
         t * 1000
       )
