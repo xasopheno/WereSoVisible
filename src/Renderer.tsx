@@ -73,11 +73,11 @@ export default class Renderer extends React.Component<Props, State> {
   private static calculateXPos(x: number): number {
     // const rand = 3 * (Math.random() * 2 - 1);
 
-    return -(x * 4 * window.innerWidth);
+    return -(x * window.innerWidth);
   }
 
   private static calculateYPos(y: number): number {
-    return Math.log(y + 0.001) * 2/3 * window.innerHeight + window.innerHeight * 5/2;
+    return y * 2 * window.innerHeight - window.innerHeight;
   }
 
   private static calculateZPos(t: number, l: number): number {
@@ -209,7 +209,7 @@ export default class Renderer extends React.Component<Props, State> {
     this.scene = new THREE.Scene();
     this.setupScene();
     this.renderer = new THREE.WebGLRenderer();
-    this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 30000);
+    this.camera = new THREE.PerspectiveCamera(50, this.state.height / this.state.width, 1, 30000);
     this.controls = new Controls(this.camera, this.container);
 
     this.camera.lookAt(this.scene.position);
@@ -239,10 +239,14 @@ export default class Renderer extends React.Component<Props, State> {
     TWEEN.update();
   }
   public updateDimensions() {
-    this.setState({
-      height: window.innerHeight,
-      width: window.innerWidth,
-    });
+    // this.setState({
+    //   height: window.innerHeight,
+    //   width: window.innerWidth,
+    // });
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(window.innerWidth, window.innerHeight );
+
   }
 
   public async getData(song: string) {
@@ -360,20 +364,19 @@ export default class Renderer extends React.Component<Props, State> {
   }
 
   public tweenCamera(camera: THREE.PerspectiveCamera, controls: any, t: number, l: number) {
-    const lm = 600;
     new TWEEN.Tween({
       position: 0,
     })
       .to(
         {
-          position: Renderer.calculateZPos(t + l * 20, l),
+          position: Renderer.calculateZPos(t + l * 25, l),
         },
-        t * 1000
+        (t - l * 8) * 1000
       )
       .onUpdate(function(this: any) {
         // camera.position.z = camera.position.z + (1 / t) * 70;
         // controls.target.z = controls.target.z + (1 / t) * 70;
-        camera.position.z += this._object.position - camera.position.z + 2300;
+        camera.position.z += this._object.position - camera.position.z + 2000;
         controls.target.z += this._object.position - controls.target.z - 500;
       })
       .start();
