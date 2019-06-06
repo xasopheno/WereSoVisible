@@ -72,7 +72,6 @@ export default class Renderer extends React.Component<Props, State> {
   }
   private static calculateXPos(x: number): number {
     // const rand = 3 * (Math.random() * 2 - 1);
-
     return -(x * window.innerWidth);
   }
 
@@ -363,22 +362,23 @@ export default class Renderer extends React.Component<Props, State> {
       .start();
   }
 
-  public tweenCamera(camera: THREE.PerspectiveCamera, controls: any, t: number, l: number) {
+  public tweenCamera = (camera: THREE.PerspectiveCamera, controls: any, t: number, l: number) => {
+    console.log(t, l, Renderer.calculateZPos(t, l))
     new TWEEN.Tween({
       position: 0,
     })
       .to(
         {
-          position: Renderer.calculateZPos(t + l * 25, l),
+          position: Renderer.calculateZPos(t, l),
         },
-        (t - l * 8) * 1000
+        (t - l) * 1000
       )
       .onUpdate(function(this: any) {
         // camera.position.z = camera.position.z + (1 / t) * 70;
         // controls.target.z = controls.target.z + (1 / t) * 70;
-        camera.position.z += this._object.position - camera.position.z + 2000;
-        controls.target.z += this._object.position - controls.target.z - 500;
+        camera.position.z = this._object.position + 1500;
+        controls.target.z = this._object.position;
       })
       .start();
-  }
+  };
 }
