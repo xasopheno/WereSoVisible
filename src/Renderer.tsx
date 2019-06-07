@@ -27,6 +27,10 @@ interface Point {
   voice: number;
 }
 
+const timeMul = 150;
+const lengthMul = 50;
+const timeOffset = 1500;
+
 export default class Renderer extends React.Component<Props, State> {
   private static fragmentShader() {
     return `
@@ -71,7 +75,6 @@ export default class Renderer extends React.Component<Props, State> {
   `;
   }
   private static calculateXPos(x: number): number {
-    // const rand = 3 * (Math.random() * 2 - 1);
     return -(x * window.innerWidth);
   }
 
@@ -80,7 +83,7 @@ export default class Renderer extends React.Component<Props, State> {
   }
 
   private static calculateZPos(t: number, l: number): number {
-    return t * 150 - 1500 + l * 50;
+    return t * timeMul - timeOffset + l * lengthMul;
   }
   private scene!: THREE.Scene;
   private camera!: THREE.PerspectiveCamera;
@@ -244,12 +247,13 @@ export default class Renderer extends React.Component<Props, State> {
     // });
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
-    this.renderer.setSize(window.innerWidth, window.innerHeight );
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
 
   }
 
   public async getData(song: string) {
-    const url = `/songs/${song}.mp3`;
+    const url = `/songs/${song}.mp3?${Math.random()}`;
+    // const url = `/songs/${song}.mp3`;
     this.audio = new Audio(url);
     this.songDataJson = await this.readJson(song);
   }
@@ -305,7 +309,7 @@ export default class Renderer extends React.Component<Props, State> {
     // const material = new THREE.MeshLambertMaterial({ color: (point.voice / 50) * 0xffffff });
     const object = new THREE.Mesh(this.geometry, material);
 
-    const time = point.t * 100 - 1000 + point.l * 100;
+    const time = point.t * timeMul - timeOffset + point.l * lengthMul;
     const scale = Math.exp(point.z);
     object.position.x = Renderer.calculateXPos(point.x);
     object.position.y = Renderer.calculateYPos(point.y);
@@ -342,7 +346,7 @@ export default class Renderer extends React.Component<Props, State> {
 
   public tweenObject(o: THREE.Mesh, l: number, t: number, scale: number) {
     new TWEEN.Tween({
-      position: l * 80,
+      position: l * lengthMul,
       scale: 0,
     })
       .to(
@@ -363,20 +367,19 @@ export default class Renderer extends React.Component<Props, State> {
   }
 
   public tweenCamera = (camera: THREE.PerspectiveCamera, controls: any, t: number, l: number) => {
-    console.log(t, l, Renderer.calculateZPos(t, l))
     new TWEEN.Tween({
       position: 0,
     })
       .to(
         {
-          position: Renderer.calculateZPos(t, l),
+          position: Renderer.calculateZPos(t + l * 160, l),
         },
-        (t - l) * 1000
+        t * 1000
       )
       .onUpdate(function(this: any) {
         // camera.position.z = camera.position.z + (1 / t) * 70;
         // controls.target.z = controls.target.z + (1 / t) * 70;
-        camera.position.z = this._object.position + 1500;
+        camera.position.z = this._object.position + timeOffset;
         controls.target.z = this._object.position;
       })
       .start();
