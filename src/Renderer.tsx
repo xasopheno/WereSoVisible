@@ -27,9 +27,14 @@ interface Point {
   voice: number;
 }
 
+interface JsonData {
+  ops: Point[];
+  length: number;
+}
+
 const timeMul = 150;
 const lengthMul = 50;
-const timeOffset = 1500;
+const timeOffset = window.innerWidth;
 
 export default class Renderer extends React.Component<Props, State> {
   private static fragmentShader() {
@@ -92,6 +97,7 @@ export default class Renderer extends React.Component<Props, State> {
   private container: Element | null;
   private controls!: OrbitControls;
   private songDataJson!: Point[];
+  private songLength: number;
   private n: number;
   private t: number;
   private audio!: HTMLAudioElement;
@@ -102,6 +108,7 @@ export default class Renderer extends React.Component<Props, State> {
     this.t = 0.0;
     this.container = null;
     this.id = null;
+    this.songLength = 0;
 
     this.state = {
       height: window.innerHeight,
@@ -127,7 +134,7 @@ export default class Renderer extends React.Component<Props, State> {
 
   public startAnimation = () => {
     this.t = Date.now();
-    this.audio.play();
+    // this.audio.play();
     this.animate();
     const last = this.songDataJson[this.songDataJson.length - 1];
     this.tweenCamera(this.camera, this.controls, last.t, last.l);
@@ -196,9 +203,10 @@ export default class Renderer extends React.Component<Props, State> {
     const width = window.innerWidth;
     const height = window.innerHeight;
 
-    this.renderer.setSize(width, height);
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
+
+    this.renderer.setSize(width, height, true);
   }
 
   public setupScene() {
@@ -241,26 +249,23 @@ export default class Renderer extends React.Component<Props, State> {
     TWEEN.update();
   }
   public updateDimensions() {
-    // this.setState({
-    //   height: window.innerHeight,
-    //   width: window.innerWidth,
-    // });
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-
+    this.renderer.setSize(window.innerWidth, window.innerHeight, true);
   }
 
   public async getData(song: string) {
     const url = `/songs/${song}.mp3?${Math.random()}`;
-    // const url = `/songs/${song}.mp3`;
     this.audio = new Audio(url);
-    this.songDataJson = await this.readJson(song);
+    const jsonData = await this.readJson(song);
+    this.songDataJson = jsonData.ops;
+    this.songLength = jsonData.length;
   }
-  public readJson = async (song: string): Promise<Point[]> => {
+  public readJson = async (song: string): Promise<JsonData> => {
     const response = await fetch(`/songs/${song}.socool.json`);
     return response.json();
   };
+
   public getPoints = (currentTime: number) => {
     let go = true;
     const points = [];
@@ -281,13 +286,7 @@ export default class Renderer extends React.Component<Props, State> {
     for (const point of points) {
       if (this.songDataJson.length > 0) {
         let object;
-        // if (
-        //   point.l > 0.3 ||
-        // ) {
         object = this.createObject(point);
-        // } else {
-        //   object = this.createSprite(point);
-        // }
         this.scene.add(object);
       }
     }
@@ -315,17 +314,10 @@ export default class Renderer extends React.Component<Props, State> {
     object.position.y = Renderer.calculateYPos(point.y);
     object.position.z = Renderer.calculateZPos(point.t, point.l);
 
-    if (point.l < 0.3) {
-      object.scale.x = scale;
-      object.scale.y = scale;
-      object.scale.z = point.l * 8;
-    } else {
-      object.scale.x = 0.00001;
-      object.scale.y = 0.00001;
-      object.scale.z = 0.00001;
-      this.tweenObject(object, point.l, time, scale);
-    }
-    // object.lookAt(this.camera.position);
+    object.scale.x = 0.00001;
+    object.scale.y = 0.00001;
+    object.scale.z = 0.00001;
+    this.tweenObject(object, point.l, time, scale);
     return object;
   }
 
@@ -347,38 +339,39 @@ export default class Renderer extends React.Component<Props, State> {
   public tweenObject(o: THREE.Mesh, l: number, t: number, scale: number) {
     new TWEEN.Tween({
       position: l * lengthMul,
-      scale: 0,
+      scale: 1.5,
+      scale_z: 0,
     })
       .to(
         {
           position: 0,
-          scale: l * 8,
+          scale: 1,
+          scale_z: l * 8,
         },
         l * 1000
       )
       .easing(TWEEN.Easing.Sinusoidal.Out)
       .onUpdate(function(this: any) {
-        o.scale.x = scale;
-        o.scale.y = scale;
-        o.scale.z = this._object.scale;
+        o.scale.x = scale * this._object.scale;
+        o.scale.y = scale * this._object.scale;
+        o.scale.z = this._object.scale_z;
         o.position.z = t - this._object.position + l * 2;
       })
       .start();
   }
 
   public tweenCamera = (camera: THREE.PerspectiveCamera, controls: any, t: number, l: number) => {
+
     new TWEEN.Tween({
       position: 0,
     })
       .to(
         {
-          position: Renderer.calculateZPos(t + l * 160, l),
+          position: this.songLength * timeMul,
         },
-        t * 1000
+        this.songLength * 1000
       )
       .onUpdate(function(this: any) {
-        // camera.position.z = camera.position.z + (1 / t) * 70;
-        // controls.target.z = controls.target.z + (1 / t) * 70;
         camera.position.z = this._object.position + timeOffset;
         controls.target.z = this._object.position;
       })
