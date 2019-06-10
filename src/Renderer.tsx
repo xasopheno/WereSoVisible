@@ -34,7 +34,7 @@ interface JsonData {
 
 const timeMul = 150;
 const lengthMul = 50;
-const timeOffset = window.innerWidth;
+const timeOffset = 1100;
 
 export default class Renderer extends React.Component<Props, State> {
   private static fragmentShader() {
@@ -134,7 +134,7 @@ export default class Renderer extends React.Component<Props, State> {
 
   public startAnimation = () => {
     this.t = Date.now();
-    // this.audio.play();
+    this.audio.play();
     this.animate();
     const last = this.songDataJson[this.songDataJson.length - 1];
     this.tweenCamera(this.camera, this.controls, last.t, last.l);
@@ -211,8 +211,6 @@ export default class Renderer extends React.Component<Props, State> {
 
   public setupScene() {
     this.scene.background = new THREE.Color(0x404040);
-    // const light = new THREE.AmbientLight(0xffaa00);
-    // this.scene.add(light);
   }
 
   public setUpThreeJS() {
@@ -346,7 +344,7 @@ export default class Renderer extends React.Component<Props, State> {
         {
           position: 0,
           scale: 1,
-          scale_z: l * 8,
+          scale_z: l * 7,
         },
         l * 1000
       )
