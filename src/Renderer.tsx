@@ -34,7 +34,7 @@ interface JsonData {
 
 const timeMul = 150;
 const lengthMul = 50;
-const timeOffset = 1100;
+const timeOffset = 1200;
 
 export default class Renderer extends React.Component<Props, State> {
   private static fragmentShader() {
