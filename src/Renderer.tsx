@@ -185,8 +185,17 @@ export default class Renderer extends React.Component<Props, State> {
     });
   }
 
+  public fade = () => {
+    if (this.audio.volume > 0.01) {
+      this.audio.volume -= 0.01;
+      setTimeout(this.fade, 1);
+    } else {
+      this.audio.pause();
+    }
+  };
+
   public componentWillUnmount() {
-    this.audio.pause();
+    this.fade();
     if (this.id) {
       window.cancelAnimationFrame(this.id);
     }
@@ -246,6 +255,7 @@ export default class Renderer extends React.Component<Props, State> {
     this.id = requestAnimationFrame(this.animate.bind(this));
     TWEEN.update();
   }
+
   public updateDimensions() {
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
@@ -338,13 +348,13 @@ export default class Renderer extends React.Component<Props, State> {
     new TWEEN.Tween({
       position: l * lengthMul,
       scale: 1.5,
-      scale_z: 0,
+      scale_z: 0
     })
       .to(
         {
           position: 0,
           scale: 1,
-          scale_z: l * 7,
+          scale_z: l * 7
         },
         l * 1000
       )
@@ -361,11 +371,11 @@ export default class Renderer extends React.Component<Props, State> {
   public tweenCamera = (camera: THREE.PerspectiveCamera, controls: any, t: number, l: number) => {
 
     new TWEEN.Tween({
-      position: 0,
+      position: 0
     })
       .to(
         {
-          position: this.songLength * timeMul,
+          position: this.songLength * timeMul
         },
         this.songLength * 1000
       )
