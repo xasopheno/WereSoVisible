@@ -2,34 +2,19 @@ import * as TWEEN from '@tweenjs/tween.js';
 import React from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import Data, { Point } from './Data';
+import Sound from './Sound';
+import { fragmentShader, vertexShader } from './Shaders';
 
 const Controls = require('three-orbit-controls')(THREE);
 
 interface State {
-  n: number;
   ready: boolean;
   play: boolean;
-  height: number;
-  width: number;
 }
 
 interface Props {
   song: string;
-}
-
-interface Point {
-  l: number;
-  t: number;
-  x: number;
-  y: number;
-  z: number;
-  event_type: string;
-  voice: number;
-}
-
-interface JsonData {
-  ops: Point[];
-  length: number;
 }
 
 const timeMul = 150;
@@ -37,48 +22,6 @@ const lengthMul = 50;
 const timeOffset = 1200;
 
 export default class Renderer extends React.Component<Props, State> {
-  private static fragmentShader() {
-    return `
-      uniform vec3 colorA; 
-      uniform vec3 colorB; 
-      // varying vec3 vUv;
-      uniform float time;
-      
-      void main() {
-          vec3 p = mod(
-            gl_FragCoord.xyz, 100.0
-          ); 
-          float r = fract(
-            sin(
-              dot(
-                p.xyz ,
-                vec3(12.9898,78.233, 24.3421)
-              )
-            ) * 43758.5453
-          );
-          gl_FragColor = vec4(
-            sin(colorA.r + r), 
-            sin(colorA.g + r) - 0.05, 
-            // sin(colorA.g + r) - 0.25, 
-            sin(colorA.b + r), 0.03
-          );
-      }
-  `;
-  }
-
-  private static vertexShader() {
-    return `
-    // varying vec3 vUv; 
-    uniform float time;
-
-    void main() {
-      // vUv = position; 
-
-      vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0) * vec4(1.0, 1.0 + sin(time * position.y), 1.0, 1.0);
-      gl_Position = projectionMatrix * modelViewPosition; 
-    }
-  `;
-  }
   private static calculateXPos(x: number): number {
     return -(x * window.innerWidth);
   }
@@ -96,27 +39,20 @@ export default class Renderer extends React.Component<Props, State> {
   private geometry: any;
   private container: Element | null;
   private controls!: OrbitControls;
-  private songDataJson!: Point[];
-  private songLength: number;
-  private n: number;
   private t: number;
-  private audio!: HTMLAudioElement;
   private id: number | null;
+  private data!: Data;
+  private audio!: Sound;
   constructor(props: Props) {
     super(props);
-    this.n = 0;
     this.t = 0.0;
     this.container = null;
     this.id = null;
-    this.songLength = 0;
 
     this.state = {
-      height: window.innerHeight,
-      n: 0,
       play: false,
       ready: false,
-      width: window.innerWidth,
-    };
+    }!;
   }
 
   public render() {
@@ -132,11 +68,11 @@ export default class Renderer extends React.Component<Props, State> {
     );
   }
 
-  public startAnimation = () => {
+  public startAnimation = async () => {
     this.t = Date.now();
-    this.audio.play();
+    await this.audio.play();
     this.animate();
-    const last = this.songDataJson[this.songDataJson.length - 1];
+    const last = this.data.events[this.data.events.length - 1];
     this.tweenCamera(this.camera, this.controls, last.t, last.l);
     this.setState({
       ...this.state,
@@ -185,17 +121,8 @@ export default class Renderer extends React.Component<Props, State> {
     });
   }
 
-  public fade = () => {
-    if (this.audio.volume > 0.01) {
-      this.audio.volume -= 0.01;
-      setTimeout(this.fade, 1);
-    } else {
-      this.audio.pause();
-    }
-  };
-
   public componentWillUnmount() {
-    this.fade();
+    this.audio.fadeOut();
     if (this.id) {
       window.cancelAnimationFrame(this.id);
     }
@@ -226,7 +153,7 @@ export default class Renderer extends React.Component<Props, State> {
     this.scene = new THREE.Scene();
     this.setupScene();
     this.renderer = new THREE.WebGLRenderer();
-    this.camera = new THREE.PerspectiveCamera(50, this.state.height / this.state.width, 1, 30000);
+    this.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 30000);
     this.controls = new Controls(this.camera, this.container);
 
     this.camera.lookAt(this.scene.position);
@@ -244,7 +171,7 @@ export default class Renderer extends React.Component<Props, State> {
   }
 
   public animate() {
-    if (this.n < this.songDataJson.length) {
+    if (this.data.n < this.data.events.length) {
       this.renderPoints();
     }
 
@@ -263,36 +190,16 @@ export default class Renderer extends React.Component<Props, State> {
   }
 
   public async getData(song: string) {
-    const url = `/songs/${song}.mp3?${Math.random()}`;
-    this.audio = new Audio(url);
-    const jsonData = await this.readJson(song);
-    this.songDataJson = jsonData.ops;
-    this.songLength = jsonData.length;
+    this.audio = new Sound(song);
+    this.data = new Data();
+    await this.data.getData(song);
   }
-  public readJson = async (song: string): Promise<JsonData> => {
-    const response = await fetch(`/songs/${song}.socool.json`);
-    return response.json();
-  };
 
-  public getPoints = (currentTime: number) => {
-    let go = true;
-    const points = [];
-    while (go) {
-      const point = this.songDataJson[this.n];
-      if (point && point.t < currentTime) {
-        points.push(point);
-        this.n += 1;
-      } else {
-        go = false;
-      }
-    }
-    return points;
-  };
   public renderPoints = () => {
     const currentTime = (Date.now() - this.t) / 1000;
-    const points = this.getPoints(currentTime);
+    const points = this.data.getPoints(currentTime);
     for (const point of points) {
-      if (this.songDataJson.length > 0) {
+      if (this.data.events.length > 0) {
         let object;
         object = this.createObject(point);
         this.scene.add(object);
@@ -309,9 +216,9 @@ export default class Renderer extends React.Component<Props, State> {
     };
 
     const material = new THREE.ShaderMaterial({
-      fragmentShader: Renderer.fragmentShader(),
+      fragmentShader: fragmentShader(),
       uniforms,
-      vertexShader: Renderer.vertexShader(),
+      vertexShader: vertexShader(),
     });
     // const material = new THREE.MeshLambertMaterial({ color: (point.voice / 50) * 0xffffff });
     const object = new THREE.Mesh(this.geometry, material);
@@ -354,7 +261,7 @@ export default class Renderer extends React.Component<Props, State> {
         {
           position: 0,
           scale: 1,
-          scale_z: l * 7
+          scale_z: l * 7,
         },
         l * 1000
       )
@@ -371,13 +278,13 @@ export default class Renderer extends React.Component<Props, State> {
   public tweenCamera = (camera: THREE.PerspectiveCamera, controls: any, t: number, l: number) => {
 
     new TWEEN.Tween({
-      position: 0
+      position: 0,
     })
       .to(
         {
-          position: this.songLength * timeMul
+          position: this.data.length * timeMul,
         },
-        this.songLength * 1000
+        this.data.length * 1000
       )
       .onUpdate(function(this: any) {
         camera.position.z = this._object.position + timeOffset;
