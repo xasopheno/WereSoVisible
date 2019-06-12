@@ -19,7 +19,7 @@ interface Props {
 
 const timeMul = 150;
 const lengthMul = 50;
-const timeOffset = 1200;
+const timeOffset = 1100;
 
 export default class Renderer extends React.Component<Props, State> {
   private static calculateXPos(x: number): number {
@@ -276,7 +276,6 @@ export default class Renderer extends React.Component<Props, State> {
   }
 
   public tweenCamera = (camera: THREE.PerspectiveCamera, controls: any, t: number, l: number) => {
-
     new TWEEN.Tween({
       position: 0,
     })
