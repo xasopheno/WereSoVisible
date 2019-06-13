@@ -15,4 +15,8 @@ export default class Sound {
   public play = async () => {
     await this.audio.play();
   };
+
+  public pause = async () => {
+    await this.audio.pause();
+  };
 }

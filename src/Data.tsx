@@ -1,5 +1,3 @@
-import * as THREE from 'three';
-
 interface JsonData {
   ops: Point[];
   length: number;
@@ -22,6 +20,7 @@ export default class Data {
   constructor() {
     this.n = 0;
   }
+
   public readJson = async (song: string): Promise<JsonData> => {
     const response = await fetch(`/songs/${song}.socool.json`);
     return response.json();
@@ -47,5 +46,4 @@ export default class Data {
     }
     return points;
   };
-
 }

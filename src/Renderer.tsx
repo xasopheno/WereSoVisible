@@ -3,9 +3,9 @@ import React from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import Data, { Point } from './Data';
-import Sound from './Sound';
 import { fragmentShader, vertexShader } from './Shaders';
-
+import Sound from './Sound';
+import Start from './Start';
 const Controls = require('three-orbit-controls')(THREE);
 
 interface State {
@@ -42,12 +42,13 @@ export default class Renderer extends React.Component<Props, State> {
   private t: number;
   private id: number | null;
   private data!: Data;
-  private audio!: Sound;
+  private audio: Sound | null;
   constructor(props: Props) {
     super(props);
     this.t = 0.0;
     this.container = null;
     this.id = null;
+    this.audio = null;
 
     this.state = {
       play: false,
@@ -58,7 +59,11 @@ export default class Renderer extends React.Component<Props, State> {
   public render() {
     return (
       <div>
-        {this.renderStartButton()}
+        <Start
+          ready={this.state.ready}
+          play={this.state.play}
+          startAnimation={this.startAnimation}
+        />
         <div
           ref={el => {
             this.container = el;
@@ -70,7 +75,9 @@ export default class Renderer extends React.Component<Props, State> {
 
   public startAnimation = async () => {
     this.t = Date.now();
-    await this.audio.play();
+    if (this.audio) {
+      await this.audio.play();
+    }
     this.animate();
     const last = this.data.events[this.data.events.length - 1];
     this.tweenCamera(this.camera, this.controls, last.t, last.l);
@@ -80,57 +87,35 @@ export default class Renderer extends React.Component<Props, State> {
     });
   };
 
-  public renderStartButton = () => {
-    if (this.state.play && this.state.ready) {
-      return;
-    } else if (this.state.ready) {
-      return (
-        <div
-          onClick={this.startAnimation}
-          style={{ position: 'absolute', backgroundColor: 'red', top: '40px', right: '10px' }}
-        >
-          <p style={{ paddingLeft: '5px', paddingRight: '5px', color: 'white', size: '14px' }}>
-            Start
-          </p>
-        </div>
-      );
-    } else {
-      return (
-        <div style={{ position: 'absolute', backgroundColor: 'blue', top: '40px', right: '10px' }}>
-          <p style={{ paddingLeft: '5px', paddingRight: '5px', color: 'white', size: '14px' }}>
-            Wait.
-          </p>
-        </div>
-      );
-    }
-  };
-
   public async componentDidMount() {
-    await this.getData(this.props.song);
     this.setUpThreeJS();
     this.setState({
       ...this.state,
       ready: true,
     });
     window.addEventListener('resize', this.updateDimensions.bind(this));
-    window.addEventListener('keydown', e => {
+    window.addEventListener('keydown', async e => {
       if (this.state.ready && !this.state.play && e.code === 'Space') {
         e.preventDefault();
-        this.startAnimation();
+        await this.startAnimation();
       }
     });
+    await this.getData(this.props.song);
   }
 
-  public componentWillUnmount() {
-    this.audio.fadeOut();
+  public async componentWillUnmount() {
+    if (this.audio) {
+      this.audio.fadeOut();
+    }
     if (this.id) {
       window.cancelAnimationFrame(this.id);
     }
+
     window.removeEventListener('resize', this.updateDimensions.bind(this));
-    window.removeEventListener('keydown', e => {
+    window.removeEventListener('keydown', async e => {
       if (this.state.ready && !this.state.play && e.code === 'Space') {
         e.preventDefault();
-        this.startAnimation();
+        await this.startAnimation();
       }
     });
   }
@@ -236,26 +221,11 @@ export default class Renderer extends React.Component<Props, State> {
     return object;
   }
 
-  public createSprite(point: Point): THREE.Sprite {
-    const sprite = new THREE.Sprite(
-      new THREE.SpriteMaterial({ color: (point.voice / 50) * 0xffffff })
-    );
-    const scale = Math.exp(point.z) - 0.5 * 30;
-    sprite.position.set(
-      Renderer.calculateXPos(point.x),
-      Renderer.calculateYPos(point.y),
-      Renderer.calculateZPos(point.t, point.l)
-    );
-    sprite.scale.set(scale / 2, scale, scale * 10);
-
-    return sprite;
-  }
-
   public tweenObject(o: THREE.Mesh, l: number, t: number, scale: number) {
     new TWEEN.Tween({
       position: l * lengthMul,
       scale: 1.5,
-      scale_z: 0
+      scale_z: 0,
     })
       .to(
         {
