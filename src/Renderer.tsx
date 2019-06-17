@@ -8,6 +8,7 @@ import Sound from './Sound';
 import Start from './Start';
 const Controls = require('three-orbit-controls')(THREE);
 
+
 interface State {
   ready: boolean;
   play: boolean;
@@ -20,6 +21,7 @@ interface Props {
 const timeMul = 150;
 const lengthMul = 50;
 const timeOffset = 1100;
+
 
 export default class Renderer extends React.Component<Props, State> {
   private static calculateXPos(x: number): number {

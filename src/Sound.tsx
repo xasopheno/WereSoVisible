@@ -20,3 +20,5 @@ export default class Sound {
     await this.audio.pause();
   };
 }
+
+
