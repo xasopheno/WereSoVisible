@@ -9,13 +9,39 @@ interface State {
 
 export default class App extends React.Component<{}, State> {
   private renderSpace: HTMLDivElement | null;
+  private ws: WebSocket | null;
   constructor(props: {}) {
     super(props);
     this.renderSpace = null;
+    this.ws = null; 
     this.state = {
       song: 'herring',
       songs: [],
     };
+  }
+
+  public setupSocket(): WebSocket {
+    const ws = new WebSocket('ws://127.0.0.1:3012');
+
+    ws.onopen = function open(event) {
+      ws.send('hello');
+    };
+
+    ws.onmessage = (event: MessageEvent) => {
+      console.log(event.data);
+      if (event.data === 'update') {
+        this.updateSong(this.state.song)
+      }
+    };
+
+    return ws
+  }
+
+  public componentDidMount() {
+    const song: string = window.location.search.substring(1) || this.state.song;
+    this.readJson();
+    this.updateSong(song);
+    this.setupSocket();
   }
 
   public render() {
@@ -29,12 +55,6 @@ export default class App extends React.Component<{}, State> {
         {this.songSelect()}
       </div>
     );
-  }
-
-  public componentDidMount() {
-    const song: string = window.location.search.substring(1) || this.state.song;
-    this.readJson();
-    this.updateSong(song);
   }
 
   public updateSong = (song: string) => {
