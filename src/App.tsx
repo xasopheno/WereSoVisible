@@ -24,13 +24,13 @@ export default class App extends React.Component<{}, State> {
     const ws = new WebSocket('ws://127.0.0.1:3012');
 
     ws.onopen = function open(event) {
-      ws.send('hello');
+      ws.send('WereSoVisible');
     };
 
     ws.onmessage = (event: MessageEvent) => {
       console.log(event.data);
       if (event.data === 'update') {
-        this.updateSong(this.state.song)
+        this.updateSong(this.state.song, true)
       }
     };
 
@@ -40,7 +40,7 @@ export default class App extends React.Component<{}, State> {
   public componentDidMount() {
     const song: string = window.location.search.substring(1) || this.state.song;
     this.readJson();
-    this.updateSong(song);
+    this.updateSong(song, false);
     this.setupSocket();
   }
 
@@ -57,10 +57,10 @@ export default class App extends React.Component<{}, State> {
     );
   }
 
-  public updateSong = (song: string) => {
+  public updateSong = (song: string, autoplay: boolean) => {
     if (this.renderSpace) {
       ReactDOM.unmountComponentAtNode(this.renderSpace);
-      ReactDOM.render(<Renderer song={song} />, this.renderSpace);
+      ReactDOM.render(<Renderer song={song} autoplay={autoplay}/>, this.renderSpace);
     }
     this.setState({
       song,
@@ -79,7 +79,7 @@ export default class App extends React.Component<{}, State> {
           top: '10px',
         }}
       >
-        <select onChange={el => this.updateSong(el.target.value)} value={this.state.song}>
+        <select onChange={el => this.updateSong(el.target.value, true)} value={this.state.song}>
           {this.state.songs.map((song, n) => {
             return (
               <option key={n} value={song}>

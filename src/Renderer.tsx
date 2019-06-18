@@ -16,6 +16,7 @@ interface State {
 
 interface Props {
   song: string;
+  autoplay: boolean;
 }
 
 const timeMul = 150;
@@ -103,6 +104,9 @@ export default class Renderer extends React.Component<Props, State> {
       }
     });
     await this.getData(this.props.song);
+    if (this.props.autoplay === true) {
+        this.startAnimation();
+    }
   }
 
   public async componentWillUnmount() {
