@@ -1,224 +1,128 @@
 import * as TWEEN from '@tweenjs/tween.js';
 import React from 'react';
 import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import Data, { Point } from './Data';
+import { fragmentShader, vertexShader } from './Shaders';
+import Sound from './Sound';
+import Start from './Start';
+const Controls = require('three-orbit-controls')(THREE);
 
-const OrbitControls = require('three-orbit-controls')(THREE);
 
 interface State {
-  n: number;
-  height: number;
-  width: number;
+  ready: boolean;
+  play: boolean;
 }
 
-interface Point {
-  l: number;
-  t: number;
-  x: number;
-  y: number;
-  z: number;
-  event_type: string;
-  voice: number;
+interface Props {
+  song: string;
+  autoplay: boolean;
 }
 
-export default class Renderer extends React.Component<{}, State> {
+const timeMul = 150;
+const lengthMul = 50;
+const timeOffset = 1100;
+
+
+export default class Renderer extends React.Component<Props, State> {
+  private static calculateXPos(x: number): number {
+    return -(x * window.innerWidth);
+  }
+
+  private static calculateYPos(y: number): number {
+    return y * 2 * window.innerHeight - window.innerHeight;
+  }
+
+  private static calculateZPos(t: number, l: number): number {
+    return t * timeMul - timeOffset + l * lengthMul;
+  }
   private scene!: THREE.Scene;
   private camera!: THREE.PerspectiveCamera;
   private renderer!: THREE.WebGLRenderer;
   private geometry: any;
-  private container!: Element;
-  private controls!: any;
-  private songDataJson!: Point[];
-  private n: number;
+  private container: Element | null;
+  private controls!: OrbitControls;
   private t: number;
-  private audio!: HTMLAudioElement;
-  private song: string;
-  constructor(props: {}) {
+  private id: number | null;
+  private data!: Data;
+  private audio: Sound | null;
+  constructor(props: Props) {
     super(props);
-    this.n = 0;
     this.t = 0.0;
-    this.song = 'tokyo';
+    this.container = null;
+    this.id = null;
+    this.audio = null;
 
     this.state = {
-      height: window.innerHeight,
-      n: 0,
-      width: window.innerWidth,
-    };
+      play: false,
+      ready: false,
+    }!;
   }
+
   public render() {
     return (
       <div>
-        <div onClick={this.start} style={{ position: 'absolute', backgroundColor: 'red' }}>
-          <p style={{ paddingLeft: '5px', paddingRight: '5px', color: 'white', size: '14px' }}>
-            Start
-          </p>
-        </div>
-        <div style={{ touchAction: 'none' }} />
+        <Start
+          ready={this.state.ready}
+          play={this.state.play}
+          startAnimation={this.startAnimation}
+        />
+        <div
+          ref={el => {
+            this.container = el;
+          }}
+        />
       </div>
     );
   }
 
-  public async componentDidMount() {
-    const url = `/${this.song}.mp3`;
-    this.audio = await new Audio(url);
-    this.songDataJson = await this.readJson();
-
-    this.setupContainer();
-    this.setUpThreeJS();
-    window.addEventListener('resize', this.updateDimensions.bind(this));
-    window.addEventListener('touchstart', function(e) { if (e.targetTouches.length === 2) { e.preventDefault(); } }, { passive: false } );
-  }
-
-  public readJson = async (): Promise<Point[]> => {
-    const response = await fetch(`/${this.song}.socool.json`);
-    return response.json();
-  };
-
-  public getPoints = () => {
-    const currentTime = (Date.now() - this.t) / 1000;
-    let go = true;
-    const points = [];
-    while (go === true) {
-      const point = this.songDataJson[this.n];
-      if (point && point.t < currentTime) {
-        points.push(point);
-        this.n += 1;
-      } else {
-        go = false;
-      }
+  public startAnimation = async () => {
+    this.t = Date.now();
+    if (this.audio) {
+      await this.audio.play();
     }
-    return points;
-  };
-
-  public renderPoints = () => {
-    const points = this.getPoints();
-    for (const point of points) {
-      if (this.songDataJson.length > 0) {
-        if (point.z > 0.0 && point.y > 20.0 && point.event_type === 'On') {
-          const object = this.createObject(point);
-          this.scene.add(object);
-        }
-      }
-    }
-  };
-  public createObject(point: Point): THREE.Mesh {
-    const object = new THREE.Mesh(
-      this.geometry,
-      new THREE.MeshLambertMaterial({ color: (point.voice / 50) * 0xffffff })
-    );
-
-    const rand = 3 * (Math.random() * 2 - 1);
-    const time = point.t * 150 - 1500 + point.l * 50;
-    const scale = Math.exp(point.z) - 0.5;
-    object.position.x = point.x * 1300 + rand;
-    object.position.y = Math.log(point.y) * 500 - 3200;
-    object.position.z = time;
-
-    if (point.l < 0.3) {
-      object.scale.x = scale;
-      object.scale.y = scale;
-      object.scale.z = point.l * 8;
-    } else {
-      object.scale.x = 0;
-      object.scale.y = 0;
-      object.scale.z = 0;
-      this.tweenObject(object, point.l, time, scale);
-    }
-
-    return object;
-  }
-
-  public tweenObject(o: THREE.Mesh, l: number, t: number, scale: number) {
-    new TWEEN.Tween({
-      position: l * 80,
-      scale: 0,
-    })
-      .to(
-        {
-          position: 0,
-          scale: l * 8,
-        },
-        l * 1000
-      )
-      .easing(TWEEN.Easing.Sinusoidal.Out)
-      .onUpdate(function(this: any) {
-        o.scale.x = scale;
-        o.scale.y = scale;
-        o.scale.z = this._object.scale;
-        o.position.z = t - this._object.position + l * 2;
-      })
-      .start();
-  }
-
-  public tweenCamera(camera: THREE.PerspectiveCamera, t: number) {
-    new TWEEN.Tween({
-      position: 0,
-    })
-      .to(
-        {
-          position: t * 150,
-        },
-        t * 1000
-      )
-      .easing(TWEEN.Easing.Sinusoidal.InOut)
-      .onUpdate(function(this: any) {
-        camera.position.z = camera.position.z + 1 / t * 150
-      })
-      .start();
-  }
-
-  public setupContainer() {
-    this.container = document.createElement('div');
-    document.body.appendChild(this.container);
-    const info = document.createElement('div');
-    info.style.position = 'absolute';
-    info.style.top = '10px';
-    info.style.width = '100%';
-    info.style.textAlign = 'center';
-    this.container.appendChild(info);
-  }
-
-  public setUpThreeJS() {
-    this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 10000);
-    this.controls = new OrbitControls(this.camera);
-
-    // this.camera.position.set(3000, 400, 300);
-    this.camera.position.set(0, 0, 800);
-    this.controls.update();
-
-    this.scene = new THREE.Scene();
-    this.camera.lookAt(this.scene.position);
-
-    this.tweenCamera(this.camera, this.songDataJson[this.songDataJson.length - 1].t);
-
-    this.scene.background = new THREE.Color(0x404040);
-    const light = new THREE.AmbientLight(0xffffff); // soft white light
-    this.scene.add(light);
-    this.geometry = new THREE.BoxBufferGeometry(20, 20, 20);
-
-    this.renderer = new THREE.WebGLRenderer();
-    this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.render(this.scene, this.camera);
-    this.container.appendChild(this.renderer.domElement);
-  }
-
-  public animate() {
-    if (this.n < this.songDataJson.length) {
-      this.renderPoints();
-    }
-
-    this.render();
-    this.controls.update();
-
-    this.renderer.render(this.scene, this.camera);
-    requestAnimationFrame(this.animate.bind(this));
-    TWEEN.update();
-  }
-
-  public updateDimensions() {
+    this.animate();
+    const last = this.data.events[this.data.events.length - 1];
+    this.tweenCamera(this.camera, this.controls, last.t, last.l);
     this.setState({
-      height: window.innerHeight,
-      width: window.innerWidth,
+      ...this.state,
+      play: true,
+    });
+  };
+
+  public async componentDidMount() {
+    this.setUpThreeJS();
+    this.setState({
+      ...this.state,
+      ready: true,
+    });
+    window.addEventListener('resize', this.updateDimensions.bind(this));
+    window.addEventListener('keydown', async e => {
+      if (this.state.ready && !this.state.play && e.code === 'Space') {
+        e.preventDefault();
+        await this.startAnimation();
+      }
+    });
+    await this.getData(this.props.song);
+    if (this.props.autoplay === true) {
+        this.startAnimation();
+    }
+  }
+
+  public async componentWillUnmount() {
+    if (this.audio) {
+      this.audio.fadeOut();
+    }
+    if (this.id) {
+      window.cancelAnimationFrame(this.id);
+    }
+
+    window.removeEventListener('resize', this.updateDimensions.bind(this));
+    window.removeEventListener('keydown', async e => {
+      if (this.state.ready && !this.state.play && e.code === 'Space') {
+        e.preventDefault();
+        await this.startAnimation();
+      }
     });
   }
 
@@ -226,20 +130,141 @@ export default class Renderer extends React.Component<{}, State> {
     const width = window.innerWidth;
     const height = window.innerHeight;
 
-    this.renderer.setSize(width, height);
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
-  }
-  /**
-   * Dipose
-   */
-  public componentWillUnmount() {
-    window.removeEventListener('resize', this.updateDimensions.bind(this));
+
+    this.renderer.setSize(width, height, true);
   }
 
-  public start = () => {
-    this.t = Date.now();
-    this.audio.play();
-    this.animate();
+  public setupScene() {
+    this.scene.background = new THREE.Color(0x404040);
+  }
+
+  public setUpThreeJS() {
+    this.scene = new THREE.Scene();
+    this.setupScene();
+    this.renderer = new THREE.WebGLRenderer();
+    this.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 30000);
+    this.controls = new Controls(this.camera, this.container);
+
+    this.camera.lookAt(this.scene.position);
+    this.camera.position.set(0, 0, 0);
+    this.controls.update();
+
+    this.geometry = new THREE.BoxBufferGeometry(20, 20, 20);
+
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.render(this.scene, this.camera);
+    if (this.container) {
+      this.container.appendChild(this.renderer.domElement);
+    }
+  }
+
+  public animate() {
+    if (this.data.n < this.data.events.length) {
+      this.renderPoints();
+    }
+
+    this.render();
+    this.controls.update();
+
+    this.renderer.render(this.scene, this.camera);
+    this.id = requestAnimationFrame(this.animate.bind(this));
+    TWEEN.update();
+  }
+
+  public updateDimensions() {
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(window.innerWidth, window.innerHeight, true);
+  }
+
+  public async getData(song: string) {
+    this.audio = new Sound(song);
+    this.data = new Data();
+    await this.data.getData(song);
+  }
+
+  public renderPoints = () => {
+    const currentTime = (Date.now() - this.t) / 1000;
+    const points = this.data.getPoints(currentTime);
+    for (const point of points) {
+      if (this.data.events.length > 0) {
+        let object;
+        object = this.createObject(point);
+        this.scene.add(object);
+      }
+    }
+  };
+
+  public createObject(point: Point): THREE.Mesh {
+    const ta = 3.0;
+    const uniforms = {
+      colorA: { type: 'vec3', value: new THREE.Color((point.voice / 50) * 0xffffff) },
+      colorB: { type: 'vec3', value: new THREE.Color((point.voice / 50) * 0xffffee) },
+      ta: { type: 'f', value: ta },
+    };
+
+    const material = new THREE.ShaderMaterial({
+      fragmentShader: fragmentShader(),
+      uniforms,
+      vertexShader: vertexShader(),
+    });
+    // const material = new THREE.MeshLambertMaterial({ color: (point.voice / 50) * 0xffffff });
+    const object = new THREE.Mesh(this.geometry, material);
+
+    const time = point.t * timeMul - timeOffset + point.l * lengthMul;
+    const scale = Math.exp(point.z);
+    object.position.x = Renderer.calculateXPos(point.x);
+    object.position.y = Renderer.calculateYPos(point.y);
+    object.position.z = Renderer.calculateZPos(point.t, point.l);
+
+    object.scale.x = 0.00001;
+    object.scale.y = 0.00001;
+    object.scale.z = 0.00001;
+    this.tweenObject(object, point.l, time, scale);
+    return object;
+  }
+
+  public tweenObject(o: THREE.Mesh, l: number, t: number, scale: number) {
+    new TWEEN.Tween({
+      position: l * lengthMul,
+      scale: 1.5,
+      scale_z: 0,
+    })
+      .to(
+        {
+          position: 0,
+          scale: 1,
+          scale_z: l * 7,
+        },
+        l * 1000
+      )
+      .easing(TWEEN.Easing.Sinusoidal.Out)
+      .onUpdate(function(this: any) {
+        o.scale.x = scale * this._object.scale;
+        o.scale.y = scale * this._object.scale;
+        o.scale.z = this._object.scale_z;
+        o.position.z = t - this._object.position + l * 2;
+      })
+      .start();
+  }
+
+  public tweenCamera = (camera: THREE.PerspectiveCamera, controls: any, t: number, l: number) => {
+    new TWEEN.Tween({
+      position: 0,
+    })
+      .to(
+        {
+          position: this.data.length * timeMul,
+        },
+        this.data.length * 1000
+      )
+      .onUpdate(function(this: any) {
+        camera.position.z = this._object.position + timeOffset;
+        controls.target.z = this._object.position;
+      })
+      .start();
   };
 }
