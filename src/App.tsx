@@ -30,11 +30,11 @@ export default class App extends React.Component<{}, State> {
     ws.onmessage = (event: MessageEvent) => {
       console.log(event.data);
       if (event.data === 'update') {
-        this.updateSong(this.state.song, true)
+        this.updateSong(this.state.song, true);
       }
     };
 
-    return ws
+    return ws;
   }
 
   public componentDidMount() {
@@ -60,7 +60,7 @@ export default class App extends React.Component<{}, State> {
   public updateSong = (song: string, autoplay: boolean) => {
     if (this.renderSpace) {
       ReactDOM.unmountComponentAtNode(this.renderSpace);
-      ReactDOM.render(<Renderer song={song} autoplay={autoplay}/>, this.renderSpace);
+      ReactDOM.render(<Renderer song={song} autoplay={autoplay} />, this.renderSpace);
     }
     this.setState({
       song,
