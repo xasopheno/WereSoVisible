@@ -13,7 +13,7 @@ export default class App extends React.Component<{}, State> {
   constructor(props: {}) {
     super(props);
     this.renderSpace = null;
-    this.ws = null; 
+    this.ws = null;
     this.state = {
       song: 'herring',
       songs: [],
