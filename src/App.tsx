@@ -38,6 +38,7 @@ export default class App extends React.Component<{}, State> {
   }
 
   public componentDidMount() {
+    console.log('app');
     const song: string = window.location.search.substring(1) || this.state.song;
     this.readJson();
     this.updateSong(song, false);
