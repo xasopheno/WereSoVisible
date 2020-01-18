@@ -1,7 +1,6 @@
 export default class Sound {
   private audio!: HTMLAudioElement;
   constructor(song: string) {
-    //this.audio = new Audio(`/songs/${song}.mp3`);
     this.audio = new Audio(`/songs/${song}.mp3?${Math.random()}`);
   }
 
