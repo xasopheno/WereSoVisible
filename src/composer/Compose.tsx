@@ -1,6 +1,7 @@
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import AceEditor from 'react-ace';
+import template from './template';
 
 import 'ace-builds/src-noconflict/mode-elixir';
 import 'ace-builds/src-noconflict/theme-terminal';
@@ -49,7 +50,7 @@ enum Keyboard {
 
 function Compose() {
   const x = '{ f: 220, l: 1, g: 1, p: 0 }\n\nmain = {\n\tTm 1\n}';
-  const [language, setLanguage] = useState<string>(x);
+  const [language, setLanguage] = useState<string>(template);
   const [vim, setVim] = useState<boolean>(true);
 
   const onSubmit = async () => {
