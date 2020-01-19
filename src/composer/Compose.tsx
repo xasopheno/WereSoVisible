@@ -52,6 +52,10 @@ function Compose() {
   const [language, setLanguage] = useState<string>(x);
   const [vim, setVim] = useState<boolean>(true);
 
+  const onSubmit = async () => {
+    console.log('render');
+  };
+
   return (
     <Space>
       <Title>WereSoCool</Title>
@@ -81,6 +85,15 @@ function Compose() {
           showLineNumbers: true,
           tabSize: 2,
         }}
+        commands={[
+          {
+            name: 'render',
+            bindKey: { win: 'Shift-Enter', mac: 'Shift-Enter' },
+            exec: () => {
+              onSubmit();
+            },
+          },
+        ]}
         style={{
           height: '80vh',
           width: '80vw',
