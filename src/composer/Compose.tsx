@@ -11,7 +11,7 @@ const Title = styled.h1`
   text-align: center;
   padding-top: 10px;
   color: #edd;
-  font-size: 1.75em;
+  font-size: 1.5em;
 `;
 
 const SubTitle = styled.p`
@@ -52,9 +52,14 @@ function Compose() {
   const x = '{ f: 220, l: 1, g: 1, p: 0 }\n\nmain = {\n\tTm 1\n}';
   const [language, setLanguage] = useState<string>(template);
   const [vim, setVim] = useState<boolean>(true);
+  const [selected, setSelected] = useState([0, 0]);
 
-  const onSubmit = async () => {
-    console.log('render');
+  const onSelectionChange = (l: any) => {
+    const sorted = [l.lead.row, l.anchor.row].sort((a, b) => a - b);
+    setSelected(sorted);
+  };
+  const onUpdate = (l: string) => {
+    setLanguage(l);
   };
 
   return (
@@ -71,13 +76,14 @@ function Compose() {
         />
       </VimBox>
       <AceEditor
-        placeholder="Placeholder Text"
+        placeholder="WereSoCool"
         mode="elixir"
         theme="terminal"
         name="wsc"
         keyboardHandler={vim ? Keyboard.Vim : Keyboard.None}
-        onChange={setLanguage}
-        fontSize={24}
+        onChange={l => onUpdate(l)}
+        onSelectionChange={s => onSelectionChange(s)}
+        fontSize={20}
         showPrintMargin={true}
         showGutter={true}
         highlightActiveLine={true}
@@ -91,7 +97,7 @@ function Compose() {
             name: 'render',
             bindKey: { win: 'Shift-Enter', mac: 'Shift-Enter' },
             exec: () => {
-              onSubmit();
+              console.log('submit');
             },
           },
         ]}
