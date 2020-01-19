@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
 //import App from './App';
-import Compose from './Compose';
+import Compose from './composer/Compose';
 import Play from './Play';
 
 class Paths extends React.Component {
