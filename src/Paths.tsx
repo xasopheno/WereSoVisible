@@ -12,7 +12,7 @@ class Paths extends React.Component {
           <Route path="/compose" children={<Compose />} />
 
           <Route path="/play/:id" children={<Play />} />
-          <Redirect from="/" to="/compose" />
+          <Redirect from="/" to="/play/table" />
         </Switch>
       </Router>
     );
@@ -20,4 +20,3 @@ class Paths extends React.Component {
 }
 
 export default Paths;
-

@@ -43,21 +43,11 @@ const CheckBox = styled.input`
   vertical-align: middle;
 `;
 
-enum Keyboard {
-  Vim = 'vim',
-  None = '',
-}
-
 function Compose() {
   const x = '{ f: 220, l: 1, g: 1, p: 0 }\n\nmain = {\n\tTm 1\n}';
   const [language, setLanguage] = useState<string>(template);
   const [vim, setVim] = useState<boolean>(true);
-  const [selected, setSelected] = useState([0, 0]);
 
-  const onSelectionChange = (l: any) => {
-    const sorted = [l.lead.row, l.anchor.row].sort((a, b) => a - b);
-    setSelected(sorted);
-  };
   const onUpdate = (l: string) => {
     setLanguage(l);
   };
@@ -80,9 +70,8 @@ function Compose() {
         mode="elixir"
         theme="terminal"
         name="wsc"
-        keyboardHandler={vim ? Keyboard.Vim : Keyboard.None}
+        keyboardHandler={vim ? 'vim' : ''}
         onChange={l => onUpdate(l)}
-        onSelectionChange={s => onSelectionChange(s)}
         fontSize={20}
         showPrintMargin={true}
         showGutter={true}
