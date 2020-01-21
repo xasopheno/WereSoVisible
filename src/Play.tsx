@@ -1,5 +1,7 @@
-import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
+import React, { useState, useEffect, Dispatch, SetStateAction, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import { useParams } from 'react-router-dom';
+import Renderer from './Renderer';
 import styled from 'styled-components';
 import axios from 'axios';
 
@@ -17,7 +19,7 @@ const SongSelectDropDown = styled.div`
   top: 10px;
 `;
 
-function songSelect(song: string, songList: string[], setSong: Dispatch<SetStateAction<string>>) {
+function songSelect(song: string, songList: string[], setSong: (song: string) => void) {
   return (
     <SongSelectDropDown>
       <select onChange={e => setSong(e.target.value)} value={song}>
@@ -39,22 +41,60 @@ const Play = () => {
 
   const [song, setSong] = useState<string>(id);
   const [songList, setSongList] = useState([]);
+  const [renderSpace, setRenderSpace] = useState<HTMLDivElement | null>();
+  const ws = useRef(new WebSocket('ws://127.0.0.1:3012'));
 
-  async function fetchData() {
+  const updateSong = (song: string) => {
+    console.log(song);
+    if (renderSpace) {
+      ReactDOM.unmountComponentAtNode(renderSpace);
+      ReactDOM.render(<Renderer song={song} autoplay={false} />, renderSpace);
+    }
+  };
+
+  const fetchData = async () => {
     const url = 'http://localhost:7777/songs/song_list.json';
     let response = await axios(url);
     let songs = await response.data.songs;
+
     setSongList(songs);
-  }
+  };
+
+  useEffect(() => {
+    ws.current.onopen = () => {
+      ws.current.send('WereSoVisible');
+    };
+
+    ws.current.onmessage = (event: MessageEvent) => {
+      console.log(event.data);
+      if (event.data === 'update') {
+        setSong(song);
+      }
+    };
+  });
 
   useEffect(() => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    updateSong(song);
+  }, [renderSpace]);
+
+  useEffect(() => () => ws.current.close(), [ws]);
+
   return (
     <div>
       <Title>Play: {song}</Title>
-      {songSelect(song, songList, setSong)}
+
+      <div>
+        <div
+          ref={el => {
+            setRenderSpace(el);
+          }}
+        />
+      </div>
+      {songSelect(song, songList, updateSong)}
     </div>
   );
 };
