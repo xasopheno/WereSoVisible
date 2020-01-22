@@ -6,10 +6,14 @@ import styled from 'styled-components';
 import axios from 'axios';
 
 const Title = styled.h1`
-  text-align: center;
-  padding-top: 10px;
   color: #454;
   font-size: 1.5em;
+`;
+
+const TitleWrapper = styled.div`
+  position: absolute;
+  width: 100%;
+  text-align: center;
 `;
 
 const SongSelectDropDown = styled.div`
@@ -20,9 +24,7 @@ const SongSelectDropDown = styled.div`
 `;
 
 const Select = styled.select`
-  background-color: salmon;
-  border: 1px solid salmon;
-  height 1.5em;
+  height: 1.5em;
   font-size: 1.1em;
 `;
 
@@ -104,7 +106,9 @@ const Play = () => {
 
   return (
     <div>
-      <Title>{song}</Title>
+      <TitleWrapper>
+        <Title>{song}</Title>
+      </TitleWrapper>
 
       <div>
         <div
