@@ -18,7 +18,7 @@ export default class Start extends React.Component<Props, {}> {
       return (
         <div
           onClick={this.props.startAnimation}
-          style={{ position: 'absolute', backgroundColor: 'red', top: '40px', right: '10px' }}
+          style={{ position: 'absolute', backgroundColor: 'salmon', top: '40px', right: '10px' }}
         >
           <p style={{ paddingLeft: '5px', paddingRight: '5px', color: 'white', size: '14px' }}>
             Start

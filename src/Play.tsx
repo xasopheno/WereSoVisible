@@ -19,6 +19,13 @@ const SongSelectDropDown = styled.div`
   top: 10px;
 `;
 
+const Select = styled.select`
+  background-color: salmon;
+  border: 1px solid salmon;
+  height 1.5em;
+  font-size: 1.1em;
+`;
+
 function songSelect(
   song: string,
   songList: string[],
@@ -26,7 +33,7 @@ function songSelect(
 ) {
   return (
     <SongSelectDropDown>
-      <select
+      <Select
         onChange={e => {
           updateSong(e.target.value, true);
         }}
@@ -39,7 +46,7 @@ function songSelect(
             </option>
           );
         })}
-      </select>
+      </Select>
     </SongSelectDropDown>
   );
 }
