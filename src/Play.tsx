@@ -1,6 +1,6 @@
-import React, { useState, useEffect, Dispatch, SetStateAction, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import Renderer from './Renderer';
 import styled from 'styled-components';
 import axios from 'axios';
@@ -8,7 +8,7 @@ import axios from 'axios';
 const Title = styled.h1`
   text-align: center;
   padding-top: 10px;
-  color: #edd;
+  color: #454;
   font-size: 1.5em;
 `;
 
@@ -19,10 +19,19 @@ const SongSelectDropDown = styled.div`
   top: 10px;
 `;
 
-function songSelect(song: string, songList: string[], setSong: (song: string) => void) {
+function songSelect(
+  song: string,
+  songList: string[],
+  updateSong: (song: string, autoplay: boolean) => void
+) {
   return (
     <SongSelectDropDown>
-      <select onChange={e => setSong(e.target.value)} value={song}>
+      <select
+        onChange={e => {
+          updateSong(e.target.value, true);
+        }}
+        value={song}
+      >
         {songList.map((song, n) => {
           return (
             <option key={n} value={song}>
@@ -42,14 +51,17 @@ const Play = () => {
   const [song, setSong] = useState<string>(id);
   const [songList, setSongList] = useState([]);
   const [renderSpace, setRenderSpace] = useState<HTMLDivElement | null>();
+  const history = useHistory();
   const ws = useRef(new WebSocket('ws://127.0.0.1:3012'));
 
-  const updateSong = (song: string) => {
-    console.log(song);
+  const updateSong = (song: string, autoplay: boolean) => {
     if (renderSpace) {
       ReactDOM.unmountComponentAtNode(renderSpace);
-      ReactDOM.render(<Renderer song={song} autoplay={false} />, renderSpace);
+      ReactDOM.render(<Renderer song={song} autoplay={autoplay} />, renderSpace);
     }
+
+    setSong(song);
+    history.push('/play/' + song);
   };
 
   const fetchData = async () => {
@@ -68,7 +80,7 @@ const Play = () => {
     ws.current.onmessage = (event: MessageEvent) => {
       console.log(event.data);
       if (event.data === 'update') {
-        setSong(song);
+        updateSong(song, true);
       }
     };
   });
@@ -78,14 +90,14 @@ const Play = () => {
   }, []);
 
   useEffect(() => {
-    updateSong(song);
+    updateSong(song, false);
   }, [renderSpace]);
 
   useEffect(() => () => ws.current.close(), [ws]);
 
   return (
     <div>
-      <Title>Play: {song}</Title>
+      <Title>{song}</Title>
 
       <div>
         <div
