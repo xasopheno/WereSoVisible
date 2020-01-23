@@ -41,7 +41,7 @@ export default class Renderer extends React.Component<Props, State> {
   }
 
   private static calculateZPos(t: number, l: number): number {
-    return t * timeMul - timeOffset + l * lengthMul;
+    return t * timeMul + l * lengthMul;
   }
 
   private scene!: THREE.Scene;
@@ -69,18 +69,19 @@ export default class Renderer extends React.Component<Props, State> {
 
   public render() {
     return (
-      <RenderSpace>
+      <div>
         <Start
           ready={this.state.ready}
           play={this.state.play}
           startAnimation={this.startAnimation}
         />
-        <div
+
+        <RenderSpace
           ref={el => {
             this.container = el;
           }}
         />
-      </RenderSpace>
+      </div>
     );
   }
 
@@ -135,13 +136,7 @@ export default class Renderer extends React.Component<Props, State> {
   }
 
   public componentDidUpdate() {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
-
-    this.renderer.setSize(width, height, true);
+    this.updateDimensions();
   }
 
   public setupScene() {
@@ -153,6 +148,8 @@ export default class Renderer extends React.Component<Props, State> {
     this.setupScene();
     this.renderer = new THREE.WebGLRenderer();
     this.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 30000);
+
+    this.camera.updateProjectionMatrix();
     this.controls = new Controls(this.camera, this.container);
 
     this.camera.lookAt(this.scene.position);
