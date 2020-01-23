@@ -7,6 +7,15 @@ import { fragmentShader, vertexShader } from './Shaders';
 import Sound from './Sound';
 import Start from './Start';
 const Controls = require('three-orbit-controls')(THREE);
+import styled from 'styled-components';
+
+const RenderSpace = styled.div`
+  canvas {
+    width: 100vw;
+    height: 100vh;
+    display: block;
+  }
+`;
 
 interface State {
   ready: boolean;
@@ -24,16 +33,17 @@ const timeOffset = 1100;
 
 export default class Renderer extends React.Component<Props, State> {
   private static calculateXPos(x: number): number {
-    return -(x * window.innerWidth);
+    return -(x * window.outerWidth * 0.8);
   }
 
   private static calculateYPos(y: number): number {
-    return y * 2 * window.innerHeight - window.innerHeight;
+    return y * (1.8 * window.outerHeight) - window.outerHeight * 0.9;
   }
 
   private static calculateZPos(t: number, l: number): number {
     return t * timeMul - timeOffset + l * lengthMul;
   }
+
   private scene!: THREE.Scene;
   private camera!: THREE.PerspectiveCamera;
   private renderer!: THREE.WebGLRenderer;
@@ -59,7 +69,7 @@ export default class Renderer extends React.Component<Props, State> {
 
   public render() {
     return (
-      <div>
+      <RenderSpace>
         <Start
           ready={this.state.ready}
           play={this.state.play}
@@ -70,7 +80,7 @@ export default class Renderer extends React.Component<Props, State> {
             this.container = el;
           }}
         />
-      </div>
+      </RenderSpace>
     );
   }
 
