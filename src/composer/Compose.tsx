@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import AceEditor from 'react-ace';
 import template from './template';
+import axios from 'axios';
 
 import 'ace-builds/src-noconflict/mode-elixir';
 import 'ace-builds/src-noconflict/theme-terminal';
 import 'ace-builds/src-noconflict/keybinding-vim';
+
+import CustomSqlMode from './mode.js';
 
 const Title = styled.h1`
   text-align: center;
@@ -47,9 +50,24 @@ function Compose() {
   const x = '{ f: 220, l: 1, g: 1, p: 0 }\n\nmain = {\n\tTm 1\n}';
   const [language, setLanguage] = useState<string>(template);
   const [vim, setVim] = useState<boolean>(true);
+  const [renderSpace, setRenderSpace] = useState<AceEditor | null>();
+
+  const customMode = new CustomSqlMode();
+  useEffect(() => {
+    if (renderSpace) {
+      renderSpace.editor.getSession().setMode(customMode);
+      console.log(renderSpace.props.mode);
+    }
+  }, [renderSpace]);
 
   const onUpdate = (l: string) => {
     setLanguage(l);
+  };
+
+  const submit = async () => {
+    const url = 'http://localhost:4599/';
+    let response = await axios.post(url, { language });
+    console.log(response);
   };
 
   return (
@@ -66,10 +84,13 @@ function Compose() {
         />
       </VimBox>
       <AceEditor
+        ref={el => {
+          setRenderSpace(el);
+        }}
         placeholder="WereSoCool"
         mode="elixir"
         theme="terminal"
-        name="wsc"
+        name="aceEditor"
         keyboardHandler={vim ? 'vim' : ''}
         onChange={l => onUpdate(l)}
         fontSize={20}
@@ -86,7 +107,7 @@ function Compose() {
             name: 'render',
             bindKey: { win: 'Shift-Enter', mac: 'Shift-Enter' },
             exec: () => {
-              console.log('submit');
+              submit();
             },
           },
         ]}
