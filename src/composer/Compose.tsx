@@ -1,11 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import AceEditor from 'react-ace';
 import template from './template';
+import './theme';
 import axios from 'axios';
 
 import 'ace-builds/src-noconflict/mode-elixir';
 import 'ace-builds/src-noconflict/theme-terminal';
+import 'ace-builds/src-noconflict/theme-github';
 import 'ace-builds/src-noconflict/keybinding-vim';
 
 import CustomSqlMode from './mode.js';
@@ -56,6 +58,7 @@ function Compose() {
   useEffect(() => {
     if (renderSpace) {
       renderSpace.editor.getSession().setMode(customMode);
+      renderSpace.editor.setTheme('ace/theme/danny');
       console.log(renderSpace.props.mode);
     }
   }, [renderSpace]);
@@ -89,7 +92,7 @@ function Compose() {
         }}
         placeholder="WereSoCool"
         mode="elixir"
-        theme="terminal"
+        theme="github"
         name="aceEditor"
         keyboardHandler={vim ? 'vim' : ''}
         onChange={l => onUpdate(l)}

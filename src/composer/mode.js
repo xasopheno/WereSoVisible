@@ -11,7 +11,7 @@ export class CustomHighlightRules extends window.ace.acequire('ace/mode/text_hig
           regex: '--.*$',
         },
         {
-          token: 'keyword',
+          token: 'constant.other',
           regex: 'f:|l:|g:|p:',
         },
         {
@@ -24,7 +24,34 @@ export class CustomHighlightRules extends window.ace.acequire('ace/mode/text_hig
         },
         {
           token: 'keyword',
-          regex: 'AsIs |Tm |Ta |PanA |PanM |Gain |Length |FitLength |O |Sequence |Overlay |Seq ',
+          regex: '{|}',
+        },
+        {
+          token: 'support.type',
+          regex: '\\[|\\]',
+        },
+        {
+          token: 'keyword',
+          regex: '\\|',
+        },
+
+        {
+          token: 'keyword',
+          regex: '>',
+        },
+
+        {
+          token: 'keyword',
+          regex: '=',
+        },
+        {
+          token: 'support.function',
+          regex: 'FitLength|O|Sequence|Overlay|Seq|Repeat',
+        },
+
+        {
+          token: 'keyword',
+          regex: 'AsIs|Tm|Ta|PanA|PanM|Gain|Length',
         },
       ],
     };
