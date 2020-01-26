@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import AceEditor from 'react-ace';
 import template from './template';
@@ -49,29 +49,41 @@ const CheckBox = styled.input`
 `;
 
 function Compose() {
-  const x = '{ f: 220, l: 1, g: 1, p: 0 }\n\nmain = {\n\tTm 1\n}';
   const [language, setLanguage] = useState<string>(template);
+  const [render, setRender] = useState<boolean>(false);
   const [vim, setVim] = useState<boolean>(true);
   const [renderSpace, setRenderSpace] = useState<AceEditor | null>();
-
   const customMode = new CustomSqlMode();
-  useEffect(() => {
-    if (renderSpace) {
-      renderSpace.editor.getSession().setMode(customMode);
-      renderSpace.editor.setTheme('ace/theme/danny');
-      console.log(renderSpace.props.mode);
-    }
-  }, [renderSpace]);
 
   const onUpdate = (l: string) => {
     setLanguage(l);
   };
 
-  const submit = async () => {
-    const url = 'http://localhost:4599/';
-    let response = await axios.post(url, { language });
-    console.log(response);
-  };
+  useEffect(() => {
+    const submit = async () => {
+      if (render) {
+        const url = 'http://localhost:4599/';
+        console.log(language);
+        try {
+          let response = await axios.post(url, { language });
+          console.log(response);
+        } catch (err) {
+          console.log(err);
+        }
+
+        setRender(false);
+      }
+    };
+
+    submit();
+  }, [render]);
+
+  useEffect(() => {
+    if (renderSpace) {
+      renderSpace.editor.getSession().setMode(customMode);
+      renderSpace.editor.setTheme('ace/theme/wsc');
+    }
+  }, [renderSpace]);
 
   return (
     <Space>
@@ -95,22 +107,22 @@ function Compose() {
         theme="github"
         name="aceEditor"
         keyboardHandler={vim ? 'vim' : ''}
+        value={language}
         onChange={l => onUpdate(l)}
         fontSize={20}
         showPrintMargin={true}
         showGutter={true}
         highlightActiveLine={true}
-        value={language}
         setOptions={{
           showLineNumbers: true,
           tabSize: 2,
         }}
         commands={[
           {
-            name: 'render',
+            name: 'submit',
             bindKey: { win: 'Shift-Enter', mac: 'Shift-Enter' },
             exec: () => {
-              submit();
+              setRender(true);
             },
           },
         ]}
