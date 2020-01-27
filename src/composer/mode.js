@@ -58,7 +58,7 @@ export class CustomHighlightRules extends window.ace.acequire('ace/mode/text_hig
   }
 }
 
-export default class CustomSqlMode extends window.ace.acequire('ace/mode/text').Mode {
+export default class WSCMode extends window.ace.acequire('ace/mode/text').Mode {
   constructor() {
     super();
     this.HighlightRules = CustomHighlightRules;

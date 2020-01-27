@@ -10,63 +10,45 @@ import 'ace-builds/src-noconflict/theme-terminal';
 import 'ace-builds/src-noconflict/theme-github';
 import 'ace-builds/src-noconflict/keybinding-vim';
 
-import CustomSqlMode from './mode.js';
-
-const Title = styled.h1`
-  text-align: center;
-  padding-top: 10px;
-  color: #edd;
-  font-size: 1.5em;
-`;
-
-const SubTitle = styled.p`
-  text-align: center;
-  color: #cbb;
-  font-size: 8;
-`;
-
-const Space = styled.div`
-  background-color: #454343;
-  height: 100vh;
-`;
-
-const VimBox = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-  margin-right: 10%;
-`;
-
-const VimText = styled.label`
-  text-align: center;
-  color: #cbb;
-  font-size: 1em;
-  padding-right: 0.2em;
-`;
-
-const CheckBox = styled.input`
-  vertical-align: middle;
-`;
+import WSCMode from './mode.js';
 
 function Compose() {
+  const audioCtx = new AudioContext();
+
+  // Create an empty three-second stereo buffer at the sample rate of the AudioContext
+
   const [language, setLanguage] = useState<string>(template);
   const [render, setRender] = useState<boolean>(false);
   const [vim, setVim] = useState<boolean>(true);
   const [renderSpace, setRenderSpace] = useState<AceEditor | null>();
-  const customMode = new CustomSqlMode();
+  const source = audioCtx.createBufferSource();
+  const customMode = new WSCMode();
 
   const onUpdate = (l: string) => {
     setLanguage(l);
+  };
+  const play = (l_buffer: Float32Array, r_buffer: Float32Array) => {
+    const buffer = audioCtx.createBuffer(2, l_buffer.length, audioCtx.sampleRate);
+    buffer.copyToChannel(l_buffer, 0);
+    buffer.copyToChannel(r_buffer, 1);
+
+    source.buffer = buffer;
+    source.connect(audioCtx.destination);
+    source.start();
   };
 
   useEffect(() => {
     const submit = async () => {
       if (render) {
         const url = 'http://localhost:4599/';
-        console.log(language);
         try {
           let response = await axios.post(url, { language });
+          console.log(response.data.l_buffer.length);
+          const l_buffer = new Float32Array(response.data.l_buffer);
+          console.log(l_buffer.length);
+          const r_buffer = new Float32Array(response.data.r_buffer);
           console.log(response);
+          play(l_buffer, r_buffer);
         } catch (err) {
           console.log(err);
         }
@@ -135,5 +117,41 @@ function Compose() {
     </Space>
   );
 }
+
+const Title = styled.h1`
+  text-align: center;
+  padding-top: 10px;
+  color: #edd;
+  font-size: 1.5em;
+`;
+
+const SubTitle = styled.p`
+  text-align: center;
+  color: #cbb;
+  font-size: 8;
+`;
+
+const Space = styled.div`
+  background-color: #454343;
+  height: 100vh;
+`;
+
+const VimBox = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  margin-right: 10%;
+`;
+
+const VimText = styled.label`
+  text-align: center;
+  color: #cbb;
+  font-size: 1em;
+  padding-right: 0.2em;
+`;
+
+const CheckBox = styled.input`
+  vertical-align: middle;
+`;
 
 export default Compose;
