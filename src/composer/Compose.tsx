@@ -12,19 +12,16 @@ import 'ace-builds/src-noconflict/keybinding-vim';
 
 import WSCMode from './mode.js';
 const audioCtx = new AudioContext();
-const source = audioCtx.createBufferSource();
 
 function Compose() {
   const customMode = new WSCMode();
 
-  const [language, setLanguage] = useState<string>(template);
-  const [render, setRender] = useState<boolean>(false);
+  const source = audioCtx.createBufferSource();
   const [vim, setVim] = useState<boolean>(true);
   const [renderSpace, setRenderSpace] = useState<AceEditor | null>();
+  const [language, setLanguage] = useState<string>(template);
+  const [render, setRender] = useState<boolean>(false);
 
-  const onUpdate = (l: string) => {
-    setLanguage(l);
-  };
   const play = (l_buffer: Float32Array, r_buffer: Float32Array) => {
     const buffer = audioCtx.createBuffer(2, l_buffer.length, audioCtx.sampleRate);
     buffer.copyToChannel(l_buffer, 0);
@@ -86,7 +83,7 @@ function Compose() {
         name="aceEditor"
         keyboardHandler={vim ? 'vim' : ''}
         value={language}
-        onChange={l => onUpdate(l)}
+        onChange={l => setLanguage(l)}
         fontSize={20}
         showPrintMargin={true}
         showGutter={true}

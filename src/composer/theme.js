@@ -17,8 +17,7 @@ color: steelblue\
 width: 1px;\
 background: #1a1a1a\
 }\
-.ace-wsc-theme {\
-background-color: black;\
+.ace-wsc-theme { background-color: black;\
 color: #DEDEDE\
 }\
 .ace-wsc-theme .ace_cursor {\
@@ -49,70 +48,41 @@ background: #2A2A2A\
 .ace-wsc-theme .ace_gutter-active-line {\
 background-color: #2A112A\
 }\
-.ace-wsc-theme .ace_marker-layer .ace_selected-word {\
-border: 1px solid #424242\
-}\
 .ace-wsc-theme .ace_invisible {\
 color: #343434\
 }\
-.ace-wsc-theme .ace_keyword,\
-.ace-wsc-theme .ace_meta,\
-.ace-wsc-theme .ace_storage,\
-.ace-wsc-theme .ace_storage.ace_type,\
-.ace-wsc-theme .ace_support.ace_type {\
+.ace-wsc-theme .ace_operation {\
 color: green\
 }\
-.ace-wsc-theme .ace_keyword.ace_operator {\
+.ace-wsc-theme .ace_danny {\
 color: deeppink\
 }\
-.ace-wsc-theme .ace_constant.ace_character,\
-.ace-wsc-theme .ace_constant.ace_language,\
-.ace-wsc-theme .ace_constant.ace_numeric,\
-.ace-wsc-theme .ace_keyword.ace_other.ace_unit,\
-.ace-wsc-theme .ace_support.ace_constant,\
-.ace-wsc-theme .ace_variable.ace_parameter {\
-color: #E78C45\
-}\
-.ace-wsc-theme .ace_constant.ace_other {\
-color: gold\
-}\
-.ace-wsc-theme .ace_invalid {\
-color: yellow;\
-background-color: red\
-}\
-.ace-wsc-theme .ace_invalid.ace_deprecated {\
-color: #CED2CF;\
-background-color: #B798BF\
-}\
-.ace-wsc-theme .ace_fold {\
-background-color: #7AA6DA;\
-border-color: #DEDEDE\
-}\
-.ace-wsc-theme .ace_entity.ace_name.ace_function,\
-.ace-wsc-theme .ace_support.ace_function,\
-.ace-wsc-theme .ace_variable {\
-color: #7AA6DA\
-}\
-.ace-wsc-theme .ace_support.ace_class,\
-.ace-wsc-theme .ace_support.ace_type {\
-color: #E7C547\
-}\
-.ace-wsc-theme .ace_heading,\
-.ace-wsc-theme .ace_string {\
-color: #B9CA4A\
-}\
-.ace-wsc-theme .ace_entity.ace_name.ace_tag,\
-.ace-wsc-theme .ace_entity.ace_other.ace_attribute-name,\
-.ace-wsc-theme .ace_meta.ace_tag,\
-.ace-wsc-theme .ace_string.ace_regexp,\
-.ace-wsc-theme .ace_variable {\
-color: #D54E53\
-}\
-.ace-wsc-theme .ace_comment {\
+.ace-wsc-theme .ace_group_operation {\
 color: orangered\
 }\
-.ace-wsc-theme .ace_indent-guide {\
-background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZgbYnAAAAEklEQVQImWNgYGBgYLBWV/8PAAK4AYnhiq+xAAAAAElFTkSuQmCC) right repeat-y;\
+.ace-wsc-theme .ace_group_operation_other {\
+color: #E7C547\
+}\
+.ace-wsc-theme .ace_o_shortcut {\
+color: #E78C45\
+}\
+.ace-wsc-theme .ace_pipe {\
+color: #D54E53\
+}\
+.ace-wsc-theme .ace_bracket {\
+color: #7AA6DA\
+}\
+.ace-wsc-theme .ace_curly {\
+color: tomato\
+}\
+.ace-wsc-theme .ace_comment {\
+color: grey\
+}\
+.ace-wsc-theme .ace_slash {\
+color: #E7C547\
+}\
+.ace-wsc-theme .ace_string {\
+color: #B9CA4A\
 }\
 ';
 

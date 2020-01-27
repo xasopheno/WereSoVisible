@@ -11,11 +11,19 @@ export class CustomHighlightRules extends window.ace.acequire('ace/mode/text_hig
           regex: '--.*$',
         },
         {
-          token: 'constant.other',
+          token: 'comment',
+          regex: '[1-9]',
+        },
+        {
+          token: 'slash',
+          regex: '[0]',
+        },
+        {
+          token: 'danny',
           regex: 'f:|l:|g:|p:',
         },
         {
-          token: 'keyword',
+          token: 'slash',
           regex: '/',
         },
         {
@@ -23,15 +31,15 @@ export class CustomHighlightRules extends window.ace.acequire('ace/mode/text_hig
           regex: '#',
         },
         {
-          token: 'keyword',
+          token: 'curly',
           regex: '{|}',
         },
         {
-          token: 'support.type',
+          token: 'bracket',
           regex: '\\[|\\]',
         },
         {
-          token: 'keyword',
+          token: 'pipe',
           regex: '\\|',
         },
 
@@ -41,16 +49,26 @@ export class CustomHighlightRules extends window.ace.acequire('ace/mode/text_hig
         },
 
         {
-          token: 'keyword',
+          token: 'curly',
           regex: '=',
         },
         {
-          token: 'support.function',
-          regex: 'FitLength|O|Sequence|Overlay|Seq|Repeat',
+          token: 'group_operation_other',
+          regex: 'FitLength|ModulateBy',
         },
 
         {
-          token: 'keyword',
+          token: 'group_operation',
+          regex: 'Sequence|Overlay|Seq|Repeat|Reverse',
+        },
+
+        {
+          token: 'o_shortcut',
+          regex: 'O',
+        },
+
+        {
+          token: 'operation',
           regex: 'AsIs|Tm|Ta|PanA|PanM|Gain|Length',
         },
       ],

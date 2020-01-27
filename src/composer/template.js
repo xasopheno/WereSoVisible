@@ -8,17 +8,31 @@ overtones = {
   ]
 }
 
-thing = {
+thing1 = {
 	overtones |
 	Sequence [
 		AsIs,
 		Tm 9/8,
     Tm 5/4,
-	] 
+  ] 
+  | ModulateBy [
+    Seq [Tm 1/2, Tm 3/4, Tm 1] | Repeat 7
+  ]
+}
+
+thing2 = {
+  Overlay [
+    Tm 3, Ta 3 | Tm 3
+  ] 
+  | Tm 5/4
+  > FitLength thing1
 }
 
 main = {
-	thing
+  Overlay [
+    thing1, 
+    thing2
+  ]
 }
 `;
 
