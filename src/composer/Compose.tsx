@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import AceEditor from 'react-ace';
 import template from './template';
@@ -11,18 +11,16 @@ import 'ace-builds/src-noconflict/theme-github';
 import 'ace-builds/src-noconflict/keybinding-vim';
 
 import WSCMode from './mode.js';
+const audioCtx = new AudioContext();
+const source = audioCtx.createBufferSource();
 
 function Compose() {
-  const audioCtx = new AudioContext();
-
-  // Create an empty three-second stereo buffer at the sample rate of the AudioContext
+  const customMode = new WSCMode();
 
   const [language, setLanguage] = useState<string>(template);
   const [render, setRender] = useState<boolean>(false);
   const [vim, setVim] = useState<boolean>(true);
   const [renderSpace, setRenderSpace] = useState<AceEditor | null>();
-  const source = audioCtx.createBufferSource();
-  const customMode = new WSCMode();
 
   const onUpdate = (l: string) => {
     setLanguage(l);
@@ -43,11 +41,8 @@ function Compose() {
         const url = 'http://localhost:4599/';
         try {
           let response = await axios.post(url, { language });
-          console.log(response.data.l_buffer.length);
           const l_buffer = new Float32Array(response.data.l_buffer);
-          console.log(l_buffer.length);
           const r_buffer = new Float32Array(response.data.r_buffer);
-          console.log(response);
           play(l_buffer, r_buffer);
         } catch (err) {
           console.log(err);
@@ -81,6 +76,7 @@ function Compose() {
         />
       </VimBox>
       <AceEditor
+        focus={true}
         ref={el => {
           setRenderSpace(el);
         }}
