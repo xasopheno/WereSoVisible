@@ -14,6 +14,9 @@ import WSCMode from './mode.js';
 
 const customMode = new WSCMode();
 const audioCtx = new AudioContext();
+const gainNodes = [new GainNode(audioCtx), new GainNode(audioCtx)];
+gainNodes[0].connect(audioCtx.destination);
+gainNodes[1].connect(audioCtx.destination);
 
 function Compose() {
   const [vim, setVim] = useState<boolean>(true);
@@ -21,18 +24,38 @@ function Compose() {
   const [language, setLanguage] = useState<string>(template);
 
   const [render, setRender] = useState<boolean>(false);
-  const [playing, setPlaying] = useState<boolean>(false);
-  const [source, setSource] = useState<AudioBufferSourceNode | null>(null);
+  const [node, setNode] = useState<number>(0);
+  const [s1, set1] = useState<AudioBufferSourceNode | null>(null);
+  const [s2, set2] = useState<AudioBufferSourceNode | null>(null);
+
+  const sources = [s1, s2];
+  const setSources = [set1, set2];
+
+  const fadeOutSource = (source: AudioBufferSourceNode | null, gainNode: GainNode) => {
+    if (source) {
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.01);
+      source.stop(audioCtx.currentTime + 0.01);
+    }
+  };
 
   useEffect(() => {
     const submit = async () => {
       if (render) {
-        if (source) {
-          source.stop();
-        }
+        setNode((node + 1) % 2);
+
+        console.log(node);
+
+        const lastSource = sources[(node + 1) % 2];
+        const lastGainNode = gainNodes[(node + 1) % 2];
+        const setSource = setSources[node];
+        const gainNode = gainNodes[node];
+
+        fadeOutSource(lastSource, lastGainNode);
+
         const url = 'http://localhost:4599/';
         try {
           let response = await axios.post(url, { language });
+
           const l_buffer = new Float32Array(response.data.l_buffer);
           const r_buffer = new Float32Array(response.data.r_buffer);
 
@@ -41,23 +64,27 @@ function Compose() {
           buffer.copyToChannel(l_buffer, 0);
           buffer.copyToChannel(r_buffer, 1);
 
-          s.connect(audioCtx.destination);
           s.buffer = buffer;
+
+          //gainNode.gain.exponentialRampToValueAtTime(1.0, audioCtx.currentTime + 0.1);
+          s.connect(gainNode);
+          //gainNode.gain.exponentialRampToValueAtTime(1.0, audioCtx.currentTime + 0.01);
+          //gainNode.gain.linearRampToValueAtTime(1.0, audioCtx.currentTime + 0.1);
           s.start();
+          //console.log(nextSetSource);
           setSource(s);
         } catch (err) {
           console.log(err);
         }
 
         setRender(false);
-        setPlaying(true);
       }
     };
 
     submit();
   }, [render]);
+  //console.log(gainNode.gain.value);
 
-  console.log(source);
   useEffect(() => {
     if (renderSpace) {
       renderSpace.editor.getSession().setMode(customMode);

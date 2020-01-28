@@ -40,10 +40,10 @@ box-shadow: 0 0 3px 0px black;\
 background: rgb(0, 0, 0)\
 }\
 .ace-wsc-theme .ace_marker-layer .ace_bracket {\
-background: #090;\
+background: salmon;\
 }\
 .ace-wsc-theme .ace_marker-layer .ace_bracket-start {\
-background: #090;\
+background: orange;\
 }\
 .ace-wsc-theme .ace_marker-layer .ace_bracket-unmatched {\
 margin: -1px 0 0 -1px;\
