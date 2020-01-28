@@ -11,11 +11,11 @@ export class CustomHighlightRules extends window.ace.acequire('ace/mode/text_hig
           regex: '--.*$',
         },
         {
-          token: 'comment',
+          token: 'number',
           regex: '[1-9]',
         },
         {
-          token: 'slash',
+          token: 'zero',
           regex: '[0]',
         },
         {
@@ -39,6 +39,10 @@ export class CustomHighlightRules extends window.ace.acequire('ace/mode/text_hig
           regex: '\\[|\\]',
         },
         {
+          token: 'paren',
+          regex: '\\(|\\)',
+        },
+        {
           token: 'pipe',
           regex: '\\|',
         },
@@ -54,12 +58,12 @@ export class CustomHighlightRules extends window.ace.acequire('ace/mode/text_hig
         },
         {
           token: 'group_operation_other',
-          regex: 'FitLength|ModulateBy',
+          regex: 'FitLength|ModulateBy|Repeat|Reverse',
         },
 
         {
           token: 'group_operation',
-          regex: 'Sequence|Overlay|Seq|Repeat|Reverse',
+          regex: 'Sequence|Overlay|Seq',
         },
 
         {
@@ -70,6 +74,10 @@ export class CustomHighlightRules extends window.ace.acequire('ace/mode/text_hig
         {
           token: 'operation',
           regex: 'AsIs|Tm|Ta|PanA|PanM|Gain|Length',
+        },
+        {
+          token: 'letter',
+          regex: '[a-z]',
         },
       ],
     };

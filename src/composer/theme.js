@@ -11,7 +11,14 @@ ace.define('ace/theme/wsc', ['require', 'exports', 'module', 'ace/lib/dom'], fun
     // eslint-disable-next-line
     '.ace-wsc-theme .ace_gutter {\
 background: #1a0005;\
-color: steelblue\
+}\
+.ace-wsc-theme {\
+background: #1a0005;\
+color: #929292\
+  font-color: red\
+}\
+.ace-wsc-theme .ace_line {\
+color: #red\
 }\
 .ace-wsc-theme .ace_print-margin {\
 width: 1px;\
@@ -52,13 +59,13 @@ background-color: #2A112A\
 color: #343434\
 }\
 .ace-wsc-theme .ace_operation {\
-color: green\
+color: orangered\
 }\
 .ace-wsc-theme .ace_danny {\
 color: deeppink\
 }\
 .ace-wsc-theme .ace_group_operation {\
-color: orangered\
+color: steelblue\
 }\
 .ace-wsc-theme .ace_group_operation_other {\
 color: #E7C547\
@@ -78,8 +85,17 @@ color: tomato\
 .ace-wsc-theme .ace_comment {\
 color: grey\
 }\
+.ace-wsc-theme .ace_number {\
+color: cornsilk\
+}\
 .ace-wsc-theme .ace_slash {\
-color: #E7C547\
+color: tan\
+}\
+.ace-wsc-theme .ace_zero {\
+color: wheat\
+}\
+.ace-wsc-theme .ace_letter {\
+color: #FFCDFF\
 }\
 .ace-wsc-theme .ace_string {\
 color: #B9CA4A\

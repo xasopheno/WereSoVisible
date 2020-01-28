@@ -1,4 +1,4 @@
-const template = `{ f: 220, l: 1, g: 1, p: 0 }
+const template = `{ f: 270, l: 1, g: 1, p: 0 }
 
 overtones = {
   O[
@@ -23,7 +23,8 @@ thing1 = {
 thing2 = {
   Overlay [
     Tm 3, Ta 3 | Tm 3
-  ] 
+  ]
+  | Seq [Tm 1, Tm 5/6, Tm 7/8 | Length 1/3]
   | Tm 5/4
   > FitLength thing1
 }
@@ -33,6 +34,8 @@ main = {
     thing1, 
     thing2
   ]
+  | Seq [Tm 1, Tm 7/8]
+  | Repeat 4
 }
 `;
 

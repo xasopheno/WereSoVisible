@@ -11,47 +11,53 @@ import 'ace-builds/src-noconflict/theme-github';
 import 'ace-builds/src-noconflict/keybinding-vim';
 
 import WSCMode from './mode.js';
+
+const customMode = new WSCMode();
 const audioCtx = new AudioContext();
 
 function Compose() {
-  const customMode = new WSCMode();
-
-  const source = audioCtx.createBufferSource();
   const [vim, setVim] = useState<boolean>(true);
   const [renderSpace, setRenderSpace] = useState<AceEditor | null>();
   const [language, setLanguage] = useState<string>(template);
+
   const [render, setRender] = useState<boolean>(false);
-
-  const play = (l_buffer: Float32Array, r_buffer: Float32Array) => {
-    const buffer = audioCtx.createBuffer(2, l_buffer.length, audioCtx.sampleRate);
-    buffer.copyToChannel(l_buffer, 0);
-    buffer.copyToChannel(r_buffer, 1);
-
-    source.buffer = buffer;
-    source.connect(audioCtx.destination);
-    source.start();
-  };
+  const [playing, setPlaying] = useState<boolean>(false);
+  const [source, setSource] = useState<AudioBufferSourceNode | null>(null);
 
   useEffect(() => {
     const submit = async () => {
       if (render) {
+        if (source) {
+          source.stop();
+        }
         const url = 'http://localhost:4599/';
         try {
           let response = await axios.post(url, { language });
           const l_buffer = new Float32Array(response.data.l_buffer);
           const r_buffer = new Float32Array(response.data.r_buffer);
-          play(l_buffer, r_buffer);
+
+          const s = audioCtx.createBufferSource();
+          const buffer = audioCtx.createBuffer(2, l_buffer.length, audioCtx.sampleRate);
+          buffer.copyToChannel(l_buffer, 0);
+          buffer.copyToChannel(r_buffer, 1);
+
+          s.connect(audioCtx.destination);
+          s.buffer = buffer;
+          s.start();
+          setSource(s);
         } catch (err) {
           console.log(err);
         }
 
         setRender(false);
+        setPlaying(true);
       }
     };
 
     submit();
   }, [render]);
 
+  console.log(source);
   useEffect(() => {
     if (renderSpace) {
       renderSpace.editor.getSession().setMode(customMode);
