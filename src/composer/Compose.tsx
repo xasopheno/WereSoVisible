@@ -14,9 +14,9 @@ import WSCMode from './mode.js';
 
 const customMode = new WSCMode();
 const audioCtx = new AudioContext();
-const gainNodes = [new GainNode(audioCtx), new GainNode(audioCtx)];
-gainNodes[0].connect(audioCtx.destination);
-gainNodes[1].connect(audioCtx.destination);
+//const gainNodes = [new GainNode(audioCtx), new GainNode(audioCtx)];
+//gainNodes[0].connect(audioCtx.destination);
+//gainNodes[1].connect(audioCtx.destination);
 
 function Compose() {
   const [vim, setVim] = useState<boolean>(true);
@@ -27,6 +27,11 @@ function Compose() {
   const [node, setNode] = useState<number>(0);
   const [s1, set1] = useState<AudioBufferSourceNode | null>(null);
   const [s2, set2] = useState<AudioBufferSourceNode | null>(null);
+
+  const [g1, setG1] = useState<GainNode>(new GainNode(audioCtx));
+  const [g2, setG2] = useState<GainNode>(new GainNode(audioCtx));
+  const gainNodes = [g1, g2];
+  const setGainNodes = [setG1, setG2];
 
   const sources = [s1, s2];
   const setSources = [set1, set2];
@@ -43,12 +48,10 @@ function Compose() {
       if (render) {
         setNode((node + 1) % 2);
 
-        console.log(node);
-
         const lastSource = sources[(node + 1) % 2];
         const lastGainNode = gainNodes[(node + 1) % 2];
         const setSource = setSources[node];
-        const gainNode = gainNodes[node];
+        const setGainNode = setGainNodes[node];
 
         fadeOutSource(lastSource, lastGainNode);
 
@@ -64,15 +67,13 @@ function Compose() {
           buffer.copyToChannel(l_buffer, 0);
           buffer.copyToChannel(r_buffer, 1);
 
+          const g = new GainNode(audioCtx);
+          g.connect(audioCtx.destination);
           s.buffer = buffer;
-
-          //gainNode.gain.exponentialRampToValueAtTime(1.0, audioCtx.currentTime + 0.1);
-          s.connect(gainNode);
-          //gainNode.gain.exponentialRampToValueAtTime(1.0, audioCtx.currentTime + 0.01);
-          //gainNode.gain.linearRampToValueAtTime(1.0, audioCtx.currentTime + 0.1);
+          s.connect(g);
           s.start();
-          //console.log(nextSetSource);
           setSource(s);
+          setGainNode(g);
         } catch (err) {
           console.log(err);
         }
