@@ -17,14 +17,11 @@ background: #1a0005;\
 color: #929292\
   font-color: red\
 }\
-.ace-wsc-theme .ace_line {\
-color: #red\
-}\
 .ace-wsc-theme .ace_print-margin {\
 width: 1px;\
 background: #1a1a1a\
 }\
-.ace-wsc-theme { background-color: black;\
+.ace-wsc-theme { background-color: #111102;\
 color: #DEDEDE\
 }\
 .ace-wsc-theme .ace_cursor {\
@@ -59,7 +56,7 @@ background-color: #2A112A\
 color: #343434\
 }\
 .ace-wsc-theme .ace_operation {\
-color: orangered\
+color: #ff6168\
 }\
 .ace-wsc-theme .ace_danny {\
 color: deeppink\
@@ -68,7 +65,7 @@ color: deeppink\
 color: steelblue\
 }\
 .ace-wsc-theme .ace_group_operation_other {\
-color: #E7C547\
+color: #FFD866\
 }\
 .ace-wsc-theme .ace_o_shortcut {\
 color: #E78C45\
@@ -82,6 +79,9 @@ color: #7AA6DA\
 .ace-wsc-theme .ace_curly {\
 color: tomato\
 }\
+.ace-wsc-theme .ace_repeat {\
+color: #A9DC76\
+}\
 .ace-wsc-theme .ace_comment {\
 color: grey\
 }\
@@ -94,13 +94,30 @@ color: tan\
 .ace-wsc-theme .ace_zero {\
 color: wheat\
 }\
+.ace-wsc-theme .ace_zero {\
+color: wheat\
+}\
 .ace-wsc-theme .ace_letter {\
 color: #FFCDFF\
 }\
 .ace-wsc-theme .ace_string {\
 color: #B9CA4A\
 }\
+.error {\
+  background: lightsalmon;\
+  opacity: 0.4;\
+  position:absolute;\
+  z-index:20;\
+}\
 ';
+
+  //.ace_marker-layer {\
+  //> div:not(.ace_selection){\
+  //width: 100% !important;\
+  //border-radius: unset !important;\
+  //left: 0 !important;\
+  //}\
+  //}\
 
   var dom = require('../lib/dom');
   dom.importCssString(exports.cssText, exports.cssClass);

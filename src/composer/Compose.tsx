@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import AceEditor from 'react-ace';
+import AceEditor, { IMarker } from 'react-ace';
 import template from './template';
 import './theme';
 import axios from 'axios';
@@ -14,9 +14,6 @@ import WSCMode from './mode.js';
 
 const customMode = new WSCMode();
 const audioCtx = new AudioContext();
-//const gainNodes = [new GainNode(audioCtx), new GainNode(audioCtx)];
-//gainNodes[0].connect(audioCtx.destination);
-//gainNodes[1].connect(audioCtx.destination);
 
 function Compose() {
   const [vim, setVim] = useState<boolean>(true);
@@ -30,6 +27,9 @@ function Compose() {
 
   const [g1, setG1] = useState<GainNode>(new GainNode(audioCtx));
   const [g2, setG2] = useState<GainNode>(new GainNode(audioCtx));
+  const [error, setError] = useState<boolean>(false);
+  const [markers, setMarkers] = useState<IMarker[]>([]);
+
   const gainNodes = [g1, g2];
   const setGainNodes = [setG1, setG2];
 
@@ -38,14 +38,16 @@ function Compose() {
 
   const fadeOutSource = (source: AudioBufferSourceNode | null, gainNode: GainNode) => {
     if (source) {
-      gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.01);
-      source.stop(audioCtx.currentTime + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.05);
+      source.stop(audioCtx.currentTime + 0.05);
     }
   };
 
   useEffect(() => {
     const submit = async () => {
       if (render) {
+        setError(false);
+        setMarkers([]);
         setNode((node + 1) % 2);
 
         const lastSource = sources[(node + 1) % 2];
@@ -58,6 +60,7 @@ function Compose() {
         const url = 'http://localhost:4599/';
         try {
           let response = await axios.post(url, { language });
+          setError(true);
 
           const l_buffer = new Float32Array(response.data.l_buffer);
           const r_buffer = new Float32Array(response.data.r_buffer);
@@ -84,7 +87,24 @@ function Compose() {
 
     submit();
   }, [render]);
-  //console.log(gainNode.gain.value);
+
+  useEffect(() => {
+    if (error) {
+      if (renderSpace) {
+        renderSpace.editor.gotoLine(12);
+      }
+      setMarkers([
+        {
+          startRow: 4,
+          startCol: 0,
+          endRow: 12,
+          endCol: 0,
+          type: 'text',
+          className: 'error',
+        },
+      ]);
+    }
+  }, [error]);
 
   useEffect(() => {
     if (renderSpace) {
@@ -118,6 +138,7 @@ function Compose() {
         keyboardHandler={vim ? 'vim' : ''}
         value={language}
         onChange={l => setLanguage(l)}
+        markers={markers}
         fontSize={20}
         showPrintMargin={true}
         showGutter={true}
@@ -146,6 +167,7 @@ function Compose() {
 }
 
 const Title = styled.h1`
+  font-family: 'Courier New', Courier, monospace;
   text-align: center;
   padding-top: 10px;
   color: #edd;
@@ -153,6 +175,7 @@ const Title = styled.h1`
 `;
 
 const SubTitle = styled.p`
+  font-family: 'Courier New', Courier, monospace;
   text-align: center;
   color: #cbb;
   font-size: 8;
@@ -171,6 +194,7 @@ const VimBox = styled.div`
 `;
 
 const VimText = styled.label`
+  font-family: 'Courier New', Courier, monospace;
   text-align: center;
   color: #cbb;
   font-size: 1em;

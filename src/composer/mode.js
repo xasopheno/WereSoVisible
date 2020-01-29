@@ -57,10 +57,17 @@ export class CustomHighlightRules extends window.ace.acequire('ace/mode/text_hig
           regex: '=',
         },
         {
-          token: 'group_operation_other',
-          regex: 'FitLength|ModulateBy|Repeat|Reverse',
+          token: 'dot',
+          regex: '\\.',
         },
-
+        {
+          token: 'group_operation_other',
+          regex: 'FitLength|ModulateBy|Reverse',
+        },
+        {
+          token: 'repeat',
+          regex: 'Repeat',
+        },
         {
           token: 'group_operation',
           regex: 'Sequence|Overlay|Seq',
