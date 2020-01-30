@@ -60,6 +60,7 @@ function Compose() {
         const url = 'http://localhost:4599/';
         try {
           let response = await axios.post(url, { language });
+          console.log(response);
           setError(true);
 
           const l_buffer = new Float32Array(response.data.l_buffer);
@@ -91,14 +92,14 @@ function Compose() {
   useEffect(() => {
     if (error) {
       if (renderSpace) {
-        renderSpace.editor.gotoLine(12);
+        renderSpace.editor.gotoLine(13, 6);
       }
       setMarkers([
         {
-          startRow: 4,
-          startCol: 0,
+          startRow: 7,
+          startCol: 19,
           endRow: 12,
-          endCol: 0,
+          endCol: 6,
           type: 'text',
           className: 'error',
         },

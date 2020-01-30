@@ -1,4 +1,7 @@
 {
+  "plugins": {
+    "react-hooks"
+  },
   "extends": [
     "tslint:recommended",
     "tslint-react",
@@ -9,6 +12,8 @@
   ],
   "rules": {
     "prettier": true,
-    "interface-name": false
+    "interface-name": false,
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn"
   }
 }

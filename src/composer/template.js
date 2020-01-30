@@ -9,10 +9,10 @@ overtones = {
 }
 
 thing1 = {
-	overtones |
-	Sequence [
-		AsIs,
-		Tm 9/8,
+  overtones |
+  Sequence [
+    AsIs,
+    Tm 9/8,
     Tm 5/4,
   ] 
   | ModulateBy [
