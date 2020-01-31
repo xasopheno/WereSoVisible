@@ -12,11 +12,11 @@ export default class Sound {
       this.audio.pause();
     }
   };
-  public play = async () => {
-    await this.audio.play();
+  public play = () => {
+    this.audio.play();
   };
 
-  public pause = async () => {
-    await this.audio.pause();
+  public pause = () => {
+    this.audio.pause();
   };
 }

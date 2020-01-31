@@ -1,4 +1,5 @@
 import React from 'react';
+import styled from 'styled-components';
 
 interface Props {
   play: boolean;
@@ -16,22 +17,15 @@ export default class Start extends React.Component<Props, {}> {
       return;
     } else if (this.props.ready) {
       return (
-        <div
-          onClick={this.props.startAnimation}
-          style={{ position: 'absolute', backgroundColor: 'salmon', top: '40px', right: '10px' }}
-        >
-          <p style={{ paddingLeft: '5px', paddingRight: '5px', color: 'white', size: '14px' }}>
-            Start
-          </p>
-        </div>
+        <PlayButton onClick={this.props.startAnimation} color={'salmon'}>
+          <PlayText>Play</PlayText>
+        </PlayButton>
       );
     } else {
       return (
-        <div style={{ position: 'absolute', backgroundColor: 'blue', top: '40px', right: '10px' }}>
-          <p style={{ paddingLeft: '5px', paddingRight: '5px', color: 'white', size: '14px' }}>
-            Wait.
-          </p>
-        </div>
+        <PlayButton color={'blue'}>
+          <PlayText>Wait.</PlayText>
+        </PlayButton>
       );
     }
   }
@@ -40,3 +34,17 @@ export default class Start extends React.Component<Props, {}> {
     return <div>{this.renderStartButton()}</div>;
   }
 }
+
+const PlayText = styled.p`
+  padding-left: 1em;
+  padding-right: 1em;
+  color: white;
+  font-size: 1.25em;
+`;
+
+const PlayButton = styled.div`
+  position: absolute;
+  background-color: ${props => props.color};
+  top: 40px;
+  right: 10px;
+`;
