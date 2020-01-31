@@ -105,7 +105,7 @@ color: #B9CA4A\
 }\
 .error {\
   background: lightsalmon;\
-  opacity: 0.4;\
+  opacity: 0.8;\
   position:absolute;\
   z-index:20;\
 }\

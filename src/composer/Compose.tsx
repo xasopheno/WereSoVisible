@@ -20,11 +20,18 @@ interface Render {
 }
 
 interface RenderError {
-  error: {
-    message: string;
-    line: number;
-    column: number;
-  };
+  message: string;
+  line: number;
+  column: number;
+}
+
+interface Marker {
+  startRow: number;
+  startCol: number;
+  endRow: number;
+  endCol: number;
+  type: string;
+  className: string;
 }
 
 const customMode = new WSCMode();
@@ -42,7 +49,6 @@ function Compose() {
 
   const [g1, setG1] = useState<GainNode>(new GainNode(audioCtx));
   const [g2, setG2] = useState<GainNode>(new GainNode(audioCtx));
-  const [error, setError] = useState<boolean>(false);
   const [markers, setMarkers] = useState<IMarker[]>([]);
 
   const gainNodes = [g1, g2];
@@ -83,7 +89,6 @@ function Compose() {
   useEffect(() => {
     const submit = async () => {
       if (render) {
-        setError(false);
         setMarkers([]);
         setNode((node + 1) % 2);
 
@@ -96,9 +101,21 @@ function Compose() {
 
         try {
           let response = await axios.post(BACKEND_RENDER_URL, { language });
-          playNewAudio(response.data.buffers, setSource, setGainNode);
-          console.log(response);
-          setError(true);
+          if (renderSpace) {
+            switch (response.data.response_type) {
+              case 'RenderSuccess':
+                playNewAudio(response.data.buffers, setSource, setGainNode);
+                break;
+              case 'RenderError':
+                const error = response.data.error;
+                displayError(error, renderSpace, setMarkers);
+                break;
+              default:
+                console.log('Not sure how we got here...');
+                console.log(response);
+                break;
+            }
+          }
         } catch (err) {
           console.log(err);
         }
@@ -111,29 +128,31 @@ function Compose() {
   }, [render]);
 
   useEffect(() => {
-    if (error) {
-      if (renderSpace) {
-        renderSpace.editor.gotoLine(13, 6);
-      }
-      setMarkers([
-        {
-          startRow: 7,
-          startCol: 19,
-          endRow: 12,
-          endCol: 6,
-          type: 'text',
-          className: 'error',
-        },
-      ]);
-    }
-  }, [error]);
-
-  useEffect(() => {
     if (renderSpace) {
       renderSpace.editor.getSession().setMode(customMode);
       renderSpace.editor.setTheme('ace/theme/wsc');
     }
   }, [renderSpace]);
+
+  const displayError = (
+    error: RenderError,
+    renderSpace: AceEditor,
+    setMarkers: Dispatch<SetStateAction<IMarker[]>>
+  ) => {
+    setMarkers([makeMarker(error.line, error.column)]);
+    renderSpace.editor.gotoLine(error.line, error.column);
+  };
+  const makeMarker = (line: number, column: number): IMarker => {
+    line -= 1;
+    return {
+      startRow: line,
+      startCol: column,
+      endRow: line,
+      endCol: column + 1,
+      type: 'text',
+      className: 'error',
+    };
+  };
 
   return (
     <Space>
