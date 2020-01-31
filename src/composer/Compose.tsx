@@ -99,7 +99,8 @@ function Compose() {
                 break;
               case 'RenderError':
                 const error = response.data.error;
-                displayError(error, renderSpace, setMarkers);
+                const n_lines = language.split('\n').length;
+                displayError(error, n_lines, renderSpace, setMarkers);
                 break;
               default:
                 console.log('Not sure how we got here...');
@@ -180,19 +181,20 @@ function Compose() {
 
 const displayError = (
   error: RenderError,
+  n_lines: number,
   renderSpace: AceEditor,
   setMarkers: Dispatch<SetStateAction<IMarker[]>>
 ) => {
-  setMarkers([makeMarker(error.line, error.column)]);
+  setMarkers([makeMarker(error.line, error.column, n_lines)]);
   renderSpace.editor.gotoLine(error.line, error.column);
 };
-const makeMarker = (line: number, column: number): IMarker => {
+const makeMarker = (line: number, column: number, n_lines: number): IMarker => {
   line -= 1;
   return {
     startRow: line,
     startCol: column,
-    endRow: line,
-    endCol: column + 1,
+    endRow: n_lines,
+    endCol: 0,
     type: 'text',
     className: 'error',
   };

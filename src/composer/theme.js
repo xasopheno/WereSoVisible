@@ -105,20 +105,11 @@ color: #B9CA4A\
 }\
 .error {\
   background: lightsalmon;\
-  opacity: 0.8;\
+  opacity: 0.2;\
   position:absolute;\
   z-index:20;\
 }\
 ';
-
-  //.ace_marker-layer {\
-  //> div:not(.ace_selection){\
-  //width: 100% !important;\
-  //border-radius: unset !important;\
-  //left: 0 !important;\
-  //}\
-  //}\
-
   var dom = require('../lib/dom');
   dom.importCssString(exports.cssText, exports.cssClass);
 });
