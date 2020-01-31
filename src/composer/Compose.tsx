@@ -1,16 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
 import AceEditor, { IMarker } from 'react-ace';
-import template from './template';
-import './theme';
 import axios from 'axios';
+import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
+import styled from 'styled-components';
+import './theme';
+
+import WSCMode from './mode.js';
+import template from './template';
 
 import 'ace-builds/src-noconflict/mode-elixir';
 import 'ace-builds/src-noconflict/theme-terminal';
 import 'ace-builds/src-noconflict/theme-github';
 import 'ace-builds/src-noconflict/keybinding-vim';
 
-import WSCMode from './mode.js';
+const BACKEND_RENDER_URL = 'http://localhost:4599/';
+
+interface Render {
+  l_buffer: Float32Array;
+  r_buffer: Float32Array;
+}
+
+interface RenderError {
+  error: {
+    message: string;
+    line: number;
+    column: number;
+  };
+}
 
 const customMode = new WSCMode();
 const audioCtx = new AudioContext();
@@ -43,6 +58,28 @@ function Compose() {
     }
   };
 
+  const playNewAudio = (
+    data: Render,
+    setSource: Dispatch<SetStateAction<AudioBufferSourceNode | null>>,
+    setGainNode: Dispatch<SetStateAction<GainNode>>
+  ) => {
+    const l_buffer = new Float32Array(data.l_buffer);
+    const r_buffer = new Float32Array(data.r_buffer);
+
+    const s = audioCtx.createBufferSource();
+    const buffer = audioCtx.createBuffer(2, l_buffer.length, audioCtx.sampleRate);
+    buffer.copyToChannel(l_buffer, 0);
+    buffer.copyToChannel(r_buffer, 1);
+
+    const g = new GainNode(audioCtx);
+    g.connect(audioCtx.destination);
+    s.buffer = buffer;
+    s.connect(g);
+    s.start();
+    setSource(s);
+    setGainNode(g);
+  };
+
   useEffect(() => {
     const submit = async () => {
       if (render) {
@@ -57,27 +94,11 @@ function Compose() {
 
         fadeOutSource(lastSource, lastGainNode);
 
-        const url = 'http://localhost:4599/';
         try {
-          let response = await axios.post(url, { language });
+          let response = await axios.post(BACKEND_RENDER_URL, { language });
+          playNewAudio(response.data.buffers, setSource, setGainNode);
           console.log(response);
           setError(true);
-
-          const l_buffer = new Float32Array(response.data.l_buffer);
-          const r_buffer = new Float32Array(response.data.r_buffer);
-
-          const s = audioCtx.createBufferSource();
-          const buffer = audioCtx.createBuffer(2, l_buffer.length, audioCtx.sampleRate);
-          buffer.copyToChannel(l_buffer, 0);
-          buffer.copyToChannel(r_buffer, 1);
-
-          const g = new GainNode(audioCtx);
-          g.connect(audioCtx.destination);
-          s.buffer = buffer;
-          s.connect(g);
-          s.start();
-          setSource(s);
-          setGainNode(g);
         } catch (err) {
           console.log(err);
         }
