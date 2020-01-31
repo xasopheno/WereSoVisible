@@ -13,6 +13,7 @@ import 'ace-builds/src-noconflict/theme-github';
 import 'ace-builds/src-noconflict/keybinding-vim';
 
 const BACKEND_RENDER_URL = 'http://localhost:4599/';
+const customMode = new WSCMode();
 
 interface Render {
   l_buffer: Float32Array;
@@ -25,16 +26,6 @@ interface RenderError {
   column: number;
 }
 
-interface Marker {
-  startRow: number;
-  startCol: number;
-  endRow: number;
-  endCol: number;
-  type: string;
-  className: string;
-}
-
-const customMode = new WSCMode();
 const audioCtx = new AudioContext();
 
 function Compose() {
@@ -134,26 +125,6 @@ function Compose() {
     }
   }, [renderSpace]);
 
-  const displayError = (
-    error: RenderError,
-    renderSpace: AceEditor,
-    setMarkers: Dispatch<SetStateAction<IMarker[]>>
-  ) => {
-    setMarkers([makeMarker(error.line, error.column)]);
-    renderSpace.editor.gotoLine(error.line, error.column);
-  };
-  const makeMarker = (line: number, column: number): IMarker => {
-    line -= 1;
-    return {
-      startRow: line,
-      startCol: column,
-      endRow: line,
-      endCol: column + 1,
-      type: 'text',
-      className: 'error',
-    };
-  };
-
   return (
     <Space>
       <Title>WereSoCool</Title>
@@ -206,6 +177,26 @@ function Compose() {
     </Space>
   );
 }
+
+const displayError = (
+  error: RenderError,
+  renderSpace: AceEditor,
+  setMarkers: Dispatch<SetStateAction<IMarker[]>>
+) => {
+  setMarkers([makeMarker(error.line, error.column)]);
+  renderSpace.editor.gotoLine(error.line, error.column);
+};
+const makeMarker = (line: number, column: number): IMarker => {
+  line -= 1;
+  return {
+    startRow: line,
+    startCol: column,
+    endRow: line,
+    endCol: column + 1,
+    type: 'text',
+    className: 'error',
+  };
+};
 
 const Title = styled.h1`
   font-family: 'Courier New', Courier, monospace;
