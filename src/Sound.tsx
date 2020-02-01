@@ -1,7 +1,10 @@
 export default class Sound {
   private audio!: HTMLAudioElement;
   constructor(song: string) {
-    this.audio = new Audio(`/songs/${song}.mp3?${Math.random()}`);
+    const audioPath = `http://${
+      process.env.SERVER_LOCATION
+    }/api/songs/${song}.mp3?${Math.random()}`;
+    this.audio = new Audio(audioPath);
   }
 
   public fadeOut = () => {

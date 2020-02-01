@@ -22,7 +22,8 @@ export default class Data {
   }
 
   public readJson = async (song: string): Promise<JsonData> => {
-    const response = await fetch(`/songs/${song}.socool.json`);
+    const jsonPath = `http://${process.env.SERVER_LOCATION}/api/songs/${song}.socool.json`;
+    const response = await fetch(jsonPath);
     return response.json();
   };
 

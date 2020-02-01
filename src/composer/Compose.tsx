@@ -12,7 +12,7 @@ import 'ace-builds/src-noconflict/theme-terminal';
 import 'ace-builds/src-noconflict/theme-github';
 import 'ace-builds/src-noconflict/keybinding-vim';
 
-const BACKEND_RENDER_URL = 'http://localhost:4599/';
+const BACKEND_RENDER_URL = `http://${process.env.SERVER_LOCATION}/api/render`;
 const customMode = new WSCMode();
 
 interface Render {
