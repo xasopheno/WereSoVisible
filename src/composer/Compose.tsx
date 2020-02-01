@@ -48,13 +48,6 @@ function Compose() {
   const sources = [s1, s2];
   const setSources = [set1, set2];
 
-  const fadeOutSource = (source: AudioBufferSourceNode | null, gainNode: GainNode) => {
-    if (source) {
-      gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.05);
-      source.stop(audioCtx.currentTime + 0.05);
-    }
-  };
-
   const playNewAudio = (
     data: Render,
     setSource: Dispatch<SetStateAction<AudioBufferSourceNode | null>>,
@@ -75,6 +68,13 @@ function Compose() {
     s.start();
     setSource(s);
     setGainNode(g);
+  };
+
+  const fadeOutSource = (source: AudioBufferSourceNode | null, gainNode: GainNode) => {
+    if (source) {
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.05);
+      source.stop(audioCtx.currentTime + 0.05);
+    }
   };
 
   useEffect(() => {
