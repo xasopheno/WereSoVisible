@@ -119,6 +119,7 @@ function Compose() {
   const stopAudio = () => {
     fadeOutSource(audioCtx, sources[(node + 1) % 2], gainNodes[(node + 1) % 2]);
   };
+
   return (
     <Space>
       <Title>WereSoCool</Title>
