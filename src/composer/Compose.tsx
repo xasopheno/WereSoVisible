@@ -2,7 +2,17 @@ import AceEditor, { IMarker } from 'react-ace';
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import './theme';
-import { Space, Title, SubTitle, VimBox, VimText, CheckBox } from './Components';
+import {
+  Space,
+  Title,
+  SubTitle,
+  VimBox,
+  VimText,
+  CheckBox,
+  Button,
+  ButtonBox,
+  TopBox,
+} from './Components';
 
 import WSCMode from './mode.js';
 import template from './template';
@@ -23,6 +33,8 @@ function Compose() {
   const [language, setLanguage] = useState<string>(template);
 
   const [render, setRender] = useState<boolean>(false);
+  const [save, setSave] = useState<boolean>(false);
+
   const [node, setNode] = useState<number>(0);
   const [sourceNode1, setSourceNode1] = useState<AudioBufferSourceNode | null>(null);
   const [sourceNode2, setSourceNode2] = useState<AudioBufferSourceNode | null>(null);
@@ -55,6 +67,7 @@ function Compose() {
           if (renderSpace) {
             switch (response.data.response_type) {
               case 'RenderSuccess':
+                localStorage.setItem('language', language);
                 playNewAudio(audioCtx, response.data.buffers, setSource, setGainNode);
                 break;
               case 'RenderError':
@@ -86,19 +99,46 @@ function Compose() {
     }
   }, [renderSpace]);
 
+  const getStoredLanguage = () => {
+    const stored = localStorage.getItem('language');
+    if (stored) {
+      setLanguage(stored);
+    }
+  };
+
+  useEffect(() => {
+    getStoredLanguage();
+  }, []);
+
+  useEffect(() => {
+    if (save) {
+      setSave(false);
+    }
+  }, [save]);
+
+  const stopAudio = () => {
+    fadeOutSource(audioCtx, sources[(node + 1) % 2], gainNodes[(node + 1) % 2]);
+  };
   return (
     <Space>
       <Title>WereSoCool</Title>
       <SubTitle>Make cool sounds. Impress your friends/pets/plants.</SubTitle>
-      <VimBox>
-        <VimText>{vim ? 'Vim!' : 'Vim?'}</VimText>
-        <CheckBox
-          name="Vim"
-          type="checkbox"
-          checked={vim ? true : false}
-          onChange={() => setVim(!vim)}
-        />
-      </VimBox>
+      <TopBox>
+        <ButtonBox>
+          <Button onClick={() => setRender(true)}>Render</Button>
+          <Button onClick={() => stopAudio()}>Stop</Button>
+        </ButtonBox>
+        <VimBox>
+          <Button onClick={() => setLanguage(template)}>Reset</Button>
+          <VimText>{vim ? 'Vim!' : 'Vim?'}</VimText>
+          <CheckBox
+            name="Vim"
+            type="checkbox"
+            checked={vim ? true : false}
+            onChange={() => setVim(!vim)}
+          />
+        </VimBox>
+      </TopBox>
       <AceEditor
         focus={true}
         ref={el => {
@@ -126,6 +166,13 @@ function Compose() {
             bindKey: { win: 'Shift-Enter', mac: 'Shift-Enter' },
             exec: () => {
               setRender(true);
+            },
+          },
+          {
+            name: 'save',
+            bindKey: { win: 'Command-s', mac: 'Command-s' },
+            exec: () => {
+              setSave(true);
             },
           },
         ]}

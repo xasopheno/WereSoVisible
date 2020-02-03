@@ -29,7 +29,7 @@ export const VimBox = styled.div`
 
 export const VimText = styled.label`
   font-family: 'Courier New', Courier, monospace;
-  text-align: center;
+  text-align: bottom;
   color: #cbb;
   font-size: 1em;
   padding-right: 0.2em;
@@ -37,4 +37,34 @@ export const VimText = styled.label`
 
 export const CheckBox = styled.input`
   vertical-align: middle;
+  margin-bottom: 0px;
 `;
+
+export const ButtonBox = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  margin-left: 10%;
+`;
+
+export const Button = styled.button`
+  font-size: 1em;
+  background-color: #454343;
+  margin-right: 2em;
+  color: #edd;
+  &:visited {
+    outline: none;
+  }
+  &:active {
+    outline: none;
+  }
+  &:focus {
+    outline: none;
+  }
+`;
+
+export const TopBox = styled.div`
+  display: flex;
+  justify-content: space-between;
+`;
+

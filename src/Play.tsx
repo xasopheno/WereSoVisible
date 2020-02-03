@@ -74,7 +74,7 @@ const Play = () => {
   };
 
   const fetchData = async () => {
-    const url = 'http://localhost:7777/songs/song_list.json';
+    const url = `http://${process.env.SERVER_LOCATION}/api/songs/song_list.json`;
     let response = await axios(url);
     let songs = await response.data.songs;
 
