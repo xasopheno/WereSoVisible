@@ -33,24 +33,34 @@ function songSelect(
   songList: string[],
   updateSong: (song: string, autoplay: boolean) => void
 ) {
-  return (
-    <SongSelectDropDown>
-      <Select
-        onChange={e => {
-          updateSong(e.target.value, true);
-        }}
-        value={song}
-      >
-        {songList.map((song, n) => {
-          return (
-            <option key={n} value={song}>
-              {song}
-            </option>
-          );
-        })}
-      </Select>
-    </SongSelectDropDown>
-  );
+  if (songList.length > 0) {
+    return (
+      <SongSelectDropDown>
+        <Select
+          onChange={e => {
+            updateSong(e.target.value, true);
+          }}
+          value={song}
+        >
+          {songList.map((song, n) => {
+            return (
+              <option key={n} value={song}>
+                {song}
+              </option>
+            );
+          })}
+        </Select>
+      </SongSelectDropDown>
+    );
+  } else {
+    return (
+      <SongSelectDropDown>
+        <Select onChange={e => {}} value={'none'}>
+          <option>None</option>
+        </Select>
+      </SongSelectDropDown>
+    );
+  }
 }
 
 const Play = () => {
@@ -61,7 +71,24 @@ const Play = () => {
   const [songList, setSongList] = useState([]);
   const [renderSpace, setRenderSpace] = useState<HTMLDivElement | null>();
   const history = useHistory();
-  const ws = useRef(new WebSocket('ws://127.0.0.1:3012'));
+
+  if (process.env.LOCAL) {
+    const ws = useRef(new WebSocket('ws://127.0.0.1:3012'));
+
+    useEffect(() => {
+      ws.current.onopen = () => {
+        ws.current.send('WereSoVisible');
+      };
+
+      ws.current.onmessage = (event: MessageEvent) => {
+        console.log(event.data);
+        if (event.data === 'update') {
+          updateSong(song, true);
+        }
+      };
+    });
+    useEffect(() => () => ws.current.close(), [ws]);
+  }
 
   const updateSong = (song: string, autoplay: boolean) => {
     if (renderSpace) {
@@ -82,19 +109,6 @@ const Play = () => {
   };
 
   useEffect(() => {
-    ws.current.onopen = () => {
-      ws.current.send('WereSoVisible');
-    };
-
-    ws.current.onmessage = (event: MessageEvent) => {
-      console.log(event.data);
-      if (event.data === 'update') {
-        updateSong(song, true);
-      }
-    };
-  });
-
-  useEffect(() => {
     fetchData();
   }, []);
 
@@ -102,13 +116,11 @@ const Play = () => {
     updateSong(song, false);
   }, [renderSpace]);
 
-  useEffect(() => () => ws.current.close(), [ws]);
-
   return (
     <div>
-      <TitleWrapper>
-        <Title>{song}</Title>
-      </TitleWrapper>
+      {/*<TitleWrapper>*/}
+      {/*<Title>{song}</Title>*/}
+      {/*</TitleWrapper>*/}
 
       <div>
         <div
