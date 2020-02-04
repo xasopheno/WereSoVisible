@@ -3,6 +3,7 @@ import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import './theme';
 import {
+  StateText,
   Space,
   Title,
   SubTitle,
@@ -27,13 +28,19 @@ const customMode = new WSCMode();
 
 const audioCtx = new AudioContext();
 
+enum State {
+  Cool,
+  Rendering,
+}
+
 function Compose() {
+  const [state, setState] = useState<State>(State.Cool);
+  const [save, setSave] = useState<boolean>(false);
   const [vim, setVim] = useState<boolean>(true);
   const [renderSpace, setRenderSpace] = useState<AceEditor | null>();
   const [language, setLanguage] = useState<string>(template);
 
   const [render, setRender] = useState<boolean>(false);
-  const [save, setSave] = useState<boolean>(false);
 
   const [node, setNode] = useState<number>(0);
   const [sourceNode1, setSourceNode1] = useState<AudioBufferSourceNode | null>(null);
@@ -49,6 +56,13 @@ function Compose() {
   const sources = [sourceNode1, sourceNode2];
   const setSources = [setSourceNode1, setSourceNode2];
 
+  const getStoredLanguage = () => {
+    const stored = localStorage.getItem('language');
+    if (stored) {
+      setLanguage(stored);
+    }
+  };
+
   useEffect(() => {
     const submit = async () => {
       if (render) {
@@ -63,6 +77,7 @@ function Compose() {
         fadeOutSource(audioCtx, lastSource, lastGainNode);
 
         try {
+          setState(State.Rendering);
           let response = await axios.post(BACKEND_RENDER_URL, { language });
           if (renderSpace) {
             switch (response.data.response_type) {
@@ -85,6 +100,7 @@ function Compose() {
           console.log(err);
         }
 
+        setState(State.Cool);
         setRender(false);
       }
     };
@@ -98,13 +114,6 @@ function Compose() {
       renderSpace.editor.setTheme('ace/theme/wsc');
     }
   }, [renderSpace]);
-
-  const getStoredLanguage = () => {
-    const stored = localStorage.getItem('language');
-    if (stored) {
-      setLanguage(stored);
-    }
-  };
 
   useEffect(() => {
     getStoredLanguage();
@@ -120,6 +129,14 @@ function Compose() {
     fadeOutSource(audioCtx, sources[(node + 1) % 2], gainNodes[(node + 1) % 2]);
   };
 
+  const RenderState = () => {
+    if (state === State.Rendering) {
+      return <StateText>Rendering</StateText>;
+    } else {
+      return <div />;
+    }
+  };
+
   return (
     <Space>
       <Title>WereSoCool</Title>
@@ -128,6 +145,7 @@ function Compose() {
         <ButtonBox>
           <Button onClick={() => setRender(true)}>Render</Button>
           <Button onClick={() => stopAudio()}>Stop</Button>
+          <RenderState />
         </ButtonBox>
         <VimBox>
           <Button onClick={() => setLanguage(template)}>Reset</Button>

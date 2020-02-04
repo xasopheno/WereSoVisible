@@ -12,7 +12,19 @@ export const SubTitle = styled.p`
   font-family: 'Courier New', Courier, monospace;
   text-align: center;
   color: #cbb;
-  font-size: 8;
+  font-size: 1em;
+`;
+
+export const StateText = styled.p`
+  font-family: 'Courier New', Courier, monospace;
+  //text-align: center;
+  color: ${props => props.color};
+  font-size: 1em;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  color: gold;
 `;
 
 export const Space = styled.div`
