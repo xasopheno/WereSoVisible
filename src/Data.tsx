@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 interface JsonData {
   ops: Point[];
   length: number;
@@ -23,8 +25,12 @@ export default class Data {
 
   public readJson = async (song: string): Promise<JsonData> => {
     const jsonPath = `http://${process.env.SERVER_LOCATION}/api/songs/${song}.socool.json`;
-    const response = await fetch(jsonPath);
-    return response.json();
+    try {
+      const response = await axios.get(jsonPath);
+      return response.data;
+    } catch (err) {
+      return { ops: [], length: 0 };
+    }
   };
 
   public async getData(song: string) {
