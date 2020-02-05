@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-interface JsonData {
+export interface JsonData {
   ops: Point[];
   length: number;
 }

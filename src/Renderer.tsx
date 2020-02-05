@@ -3,8 +3,8 @@ import React from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import Data, { Point } from './Data';
-import { fragmentShader, vertexShader } from './Shaders';
 import Sound from './Sound';
+import { fragmentShader, vertexShader } from './Shaders';
 import Start from './Start';
 const Controls = require('three-orbit-controls')(THREE);
 import styled from 'styled-components';
@@ -25,6 +25,8 @@ interface State {
 interface Props {
   song: string;
   autoplay: boolean;
+  data: Data;
+  audio: Sound | null;
 }
 
 const timeMul = 150;
@@ -52,14 +54,12 @@ export default class Renderer extends React.Component<Props, State> {
   private controls!: OrbitControls;
   private t: number;
   private id: number | null;
-  private data!: Data;
-  private audio: Sound | null;
   constructor(props: Props) {
     super(props);
     this.t = 0.0;
     this.container = null;
     this.id = null;
-    this.audio = null;
+    //this.props.audio = null;
 
     this.state = {
       play: false,
@@ -87,11 +87,11 @@ export default class Renderer extends React.Component<Props, State> {
 
   public startAnimation = async () => {
     this.t = Date.now();
-    if (this.audio) {
-      await this.audio.play();
+    if (this.props.audio) {
+      await this.props.audio.play();
     }
     this.animate();
-    const last = this.data.events[this.data.events.length - 1];
+    const last = this.props.data.events[this.props.data.events.length - 1];
     this.tweenCamera(this.camera, this.controls, last.t, last.l);
     this.setState({
       ...this.state,
@@ -112,15 +112,15 @@ export default class Renderer extends React.Component<Props, State> {
         await this.startAnimation();
       }
     });
-    await this.getData(this.props.song);
+    //await this.getData(this.props.song);
     if (this.props.autoplay === true) {
       this.startAnimation();
     }
   }
 
   public async componentWillUnmount() {
-    if (this.audio) {
-      this.audio.fadeOut();
+    if (this.props.audio) {
+      this.props.audio.fadeOut();
     }
     if (this.id) {
       window.cancelAnimationFrame(this.id);
@@ -167,7 +167,7 @@ export default class Renderer extends React.Component<Props, State> {
   }
 
   public animate() {
-    if (this.data.n < this.data.events.length) {
+    if (this.props.data.n < this.props.data.events.length) {
       this.renderPoints();
     }
 
@@ -185,17 +185,11 @@ export default class Renderer extends React.Component<Props, State> {
     this.renderer.setSize(window.innerWidth, window.innerHeight, true);
   }
 
-  public async getData(song: string) {
-    this.audio = new Sound(song);
-    this.data = new Data();
-    await this.data.getData(song);
-  }
-
   public renderPoints = () => {
     const currentTime = (Date.now() - this.t) / 1000;
-    const points = this.data.getPoints(currentTime);
+    const points = this.props.data.getPoints(currentTime);
     for (const point of points) {
-      if (this.data.events.length > 0) {
+      if (this.props.data.events.length > 0) {
         let object;
         object = this.createObject(point);
         this.scene.add(object);
@@ -262,9 +256,9 @@ export default class Renderer extends React.Component<Props, State> {
     })
       .to(
         {
-          position: this.data.length * timeMul,
+          position: this.props.data.length * timeMul,
         },
-        this.data.length * 1000
+        this.props.data.length * 1000
       )
       .onUpdate(function(this: any) {
         camera.position.z = this._object.position + timeOffset;

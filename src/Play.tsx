@@ -4,6 +4,8 @@ import { useParams, useHistory } from 'react-router-dom';
 import Renderer from './Renderer';
 import styled from 'styled-components';
 import axios from 'axios';
+import Data, { Point, JsonData } from './Data';
+import Sound from './Sound';
 
 const Title = styled.h1`
   color: #454;
@@ -63,6 +65,14 @@ function songSelect(
   }
 }
 
+function getData(song: string): JsonData {
+  //const audio = new Sound(song);
+  const data = { ops: [], length: 0 };
+  //const json = data.getData(song);
+  //return audio, json;
+  return data;
+}
+
 const Play = () => {
   let { id } = useParams();
   if (!id) id = '';
@@ -93,7 +103,10 @@ const Play = () => {
   const updateSong = (song: string, autoplay: boolean) => {
     if (renderSpace) {
       ReactDOM.unmountComponentAtNode(renderSpace);
-      ReactDOM.render(<Renderer song={song} autoplay={autoplay} />, renderSpace);
+      ReactDOM.render(
+        <Renderer song={song} autoplay={autoplay} data={new Data()} audio={null} />,
+        renderSpace
+      );
     }
 
     setSong(song);
