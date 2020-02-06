@@ -7,15 +7,6 @@ import { fragmentShader, vertexShader } from './Shaders';
 import Sound from './Sound';
 import Start from './Start';
 const Controls = require('three-orbit-controls')(THREE);
-import styled from 'styled-components';
-
-const RenderSpace = styled.div`
-  canvas {
-    width: 100vw;
-    height: 100vh;
-    display: block;
-  }
-`;
 
 interface State {
   ready: boolean;
@@ -33,17 +24,16 @@ const timeOffset = 1100;
 
 export default class Renderer extends React.Component<Props, State> {
   private static calculateXPos(x: number): number {
-    return -(x * window.outerWidth * 0.8);
+    return -(x * window.innerWidth);
   }
 
   private static calculateYPos(y: number): number {
-    return y * (1.8 * window.outerHeight) - window.outerHeight * 0.9;
+    return y * 2 * window.innerHeight - window.innerHeight;
   }
 
   private static calculateZPos(t: number, l: number): number {
-    return t * timeMul + l * lengthMul;
+    return t * timeMul - timeOffset + l * lengthMul;
   }
-
   private scene!: THREE.Scene;
   private camera!: THREE.PerspectiveCamera;
   private renderer!: THREE.WebGLRenderer;
@@ -75,8 +65,7 @@ export default class Renderer extends React.Component<Props, State> {
           play={this.state.play}
           startAnimation={this.startAnimation}
         />
-
-        <RenderSpace
+        <div
           ref={el => {
             this.container = el;
           }}
@@ -86,17 +75,19 @@ export default class Renderer extends React.Component<Props, State> {
   }
 
   public startAnimation = async () => {
-    this.t = Date.now();
-    if (this.audio) {
-      await this.audio.play();
-    }
-    this.animate();
-    const last = this.data.events[this.data.events.length - 1];
-    this.tweenCamera(this.camera, this.controls, last.t, last.l);
-    this.setState({
-      ...this.state,
-      play: true,
-    });
+    try {
+      this.t = Date.now();
+      if (this.audio) {
+        await this.audio.play();
+      }
+      this.animate();
+      const last = this.data.events[this.data.events.length - 1];
+      this.tweenCamera(this.camera, this.controls, last.t, last.l);
+      this.setState({
+        ...this.state,
+        play: true,
+      });
+    } catch (err) {}
   };
 
   public async componentDidMount() {
@@ -136,7 +127,13 @@ export default class Renderer extends React.Component<Props, State> {
   }
 
   public componentDidUpdate() {
-    this.updateDimensions();
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+
+    this.renderer.setSize(width, height, true);
   }
 
   public setupScene() {
@@ -148,8 +145,6 @@ export default class Renderer extends React.Component<Props, State> {
     this.setupScene();
     this.renderer = new THREE.WebGLRenderer();
     this.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 30000);
-
-    this.camera.updateProjectionMatrix();
     this.controls = new Controls(this.camera, this.container);
 
     this.camera.lookAt(this.scene.position);
