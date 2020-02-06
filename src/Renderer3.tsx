@@ -25,25 +25,26 @@ interface State {
 interface Props {
   song: string;
   autoplay: boolean;
+  data: Data;
 }
 
 const timeMul = 150;
 const lengthMul = 50;
 const timeOffset = 1100;
 
+const calculateXPos = (x: number): number => {
+  return -(x * window.outerWidth * 0.8);
+};
+
+const calculateYPos = (y: number): number => {
+  return y * (1.8 * window.outerHeight) - window.outerHeight * 0.9;
+};
+
+const calculateZPos = (t: number, l: number): number => {
+  return t * timeMul + l * lengthMul;
+};
+
 export default class Renderer extends React.Component<Props, State> {
-  private static calculateXPos(x: number): number {
-    return -(x * window.outerWidth * 0.8);
-  }
-
-  private static calculateYPos(y: number): number {
-    return y * (1.8 * window.outerHeight) - window.outerHeight * 0.9;
-  }
-
-  private static calculateZPos(t: number, l: number): number {
-    return t * timeMul + l * lengthMul;
-  }
-
   private scene!: THREE.Scene;
   private camera!: THREE.PerspectiveCamera;
   private renderer!: THREE.WebGLRenderer;
@@ -86,17 +87,19 @@ export default class Renderer extends React.Component<Props, State> {
   }
 
   public startAnimation = async () => {
-    this.t = Date.now();
-    if (this.audio) {
-      await this.audio.play();
-    }
-    this.animate();
-    const last = this.data.events[this.data.events.length - 1];
-    this.tweenCamera(this.camera, this.controls, last.t, last.l);
-    this.setState({
-      ...this.state,
-      play: true,
-    });
+    try {
+      this.t = Date.now();
+      if (this.audio) {
+        await this.audio.play();
+      }
+      this.animate();
+      const last = this.props.data.events[this.props.data.events.length - 1];
+      this.tweenCamera(this.camera, this.controls, last.t, last.l);
+      this.setState({
+        ...this.state,
+        play: true,
+      });
+    } catch (err) {}
   };
 
   public async componentDidMount() {
@@ -167,7 +170,7 @@ export default class Renderer extends React.Component<Props, State> {
   }
 
   public animate() {
-    if (this.data.n < this.data.events.length) {
+    if (this.props.data.n < this.props.data.events.length) {
       this.renderPoints();
     }
 
@@ -187,15 +190,15 @@ export default class Renderer extends React.Component<Props, State> {
 
   public async getData(song: string) {
     this.audio = new Sound(song);
-    this.data = new Data();
-    await this.data.getData(song);
+    //this.props.data = new Data();
+    //await this.props.data.getData(song);
   }
 
   public renderPoints = () => {
     const currentTime = (Date.now() - this.t) / 1000;
-    const points = this.data.getPoints(currentTime);
+    const points = this.props.data.getPoints(currentTime);
     for (const point of points) {
-      if (this.data.events.length > 0) {
+      if (this.props.data.events.length > 0) {
         let object;
         object = this.createObject(point);
         this.scene.add(object);
@@ -203,7 +206,7 @@ export default class Renderer extends React.Component<Props, State> {
     }
   };
 
-  public createObject(point: Point): THREE.Mesh {
+  createObject = (point: Point): THREE.Mesh => {
     const ta = 3.0;
     const uniforms = {
       colorA: { type: 'vec3', value: new THREE.Color((point.voice / 50) * 0xffffff) },
@@ -221,16 +224,16 @@ export default class Renderer extends React.Component<Props, State> {
 
     const time = point.t * timeMul - timeOffset + point.l * lengthMul;
     const scale = Math.exp(point.z);
-    object.position.x = Renderer.calculateXPos(point.x);
-    object.position.y = Renderer.calculateYPos(point.y);
-    object.position.z = Renderer.calculateZPos(point.t, point.l);
+    object.position.x = calculateXPos(point.x);
+    object.position.y = calculateYPos(point.y);
+    object.position.z = calculateZPos(point.t, point.l);
 
     object.scale.x = 0.00001;
     object.scale.y = 0.00001;
     object.scale.z = 0.00001;
     this.tweenObject(object, point.l, time, scale);
     return object;
-  }
+  };
 
   public tweenObject(o: THREE.Mesh, l: number, t: number, scale: number) {
     new TWEEN.Tween({
@@ -262,9 +265,9 @@ export default class Renderer extends React.Component<Props, State> {
     })
       .to(
         {
-          position: this.data.length * timeMul,
+          position: this.props.data.length * timeMul,
         },
-        this.data.length * 1000
+        this.props.data.length * 1000
       )
       .onUpdate(function(this: any) {
         camera.position.z = this._object.position + timeOffset;

@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { useParams, useHistory } from 'react-router-dom';
-import Renderer from './Renderer';
+import Renderer from './Renderer3';
 import styled from 'styled-components';
 import axios from 'axios';
-import Data, { Point, JsonData } from './Data';
-import Sound from './Sound';
+import Data from './Data';
 
 const Title = styled.h1`
   color: #454;
@@ -30,11 +29,18 @@ const Select = styled.select`
   font-size: 1.1em;
 `;
 
-function songSelect(
+//const getData = async (song: string): Promise<Data> => {
+////const audio = new Sound(song);
+//const data = new Data();
+//await data.getData(song);
+//return data;
+//};
+
+const songSelect = (
   song: string,
   songList: string[],
   updateSong: (song: string, autoplay: boolean) => void
-) {
+) => {
   if (songList.length > 0) {
     return (
       <SongSelectDropDown>
@@ -63,21 +69,14 @@ function songSelect(
       </SongSelectDropDown>
     );
   }
-}
-
-function getData(song: string): JsonData {
-  //const audio = new Sound(song);
-  const data = { ops: [], length: 0 };
-  //const json = data.getData(song);
-  //return audio, json;
-  return data;
-}
+};
 
 const Play = () => {
   let { id } = useParams();
   if (!id) id = '';
 
   const [song, setSong] = useState<string>(id);
+  const [data, setData] = useState<Data | null>(null);
   const [songList, setSongList] = useState([]);
   const [renderSpace, setRenderSpace] = useState<HTMLDivElement | null>();
   const history = useHistory();
@@ -100,13 +99,20 @@ const Play = () => {
     useEffect(() => () => ws.current.close(), [ws]);
   }
 
+  //useEffect(() => {
+  //const getData = async () => {
+  //const data = new Data();
+  //await data.getData(song);
+
+  //setData(data);
+  //};
+  //getData();
+  //}, []);
+
   const updateSong = (song: string, autoplay: boolean) => {
-    if (renderSpace) {
+    if (renderSpace && data) {
       ReactDOM.unmountComponentAtNode(renderSpace);
-      ReactDOM.render(
-        <Renderer song={song} autoplay={autoplay} data={new Data()} audio={null} />,
-        renderSpace
-      );
+      ReactDOM.render(<Renderer song={song} autoplay={autoplay} a />, renderSpace);
     }
 
     setSong(song);
@@ -127,7 +133,7 @@ const Play = () => {
 
   useEffect(() => {
     updateSong(song, false);
-  }, [renderSpace]);
+  }, [renderSpace, data]);
 
   return (
     <div>

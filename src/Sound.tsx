@@ -1,14 +1,10 @@
 export default class Sound {
   private audio!: HTMLAudioElement;
   constructor(song: string) {
-    try {
-      const audioPath = `http://${
-        process.env.SERVER_LOCATION
-      }/api/songs/${song}.mp3?${Math.random()}`;
-      this.audio = new Audio(audioPath);
-    } catch (err) {
-      this.audio = new Audio();
-    }
+    const audioPath = `http://${
+      process.env.SERVER_LOCATION
+    }/api/songs/${song}.mp3?${Math.random()}`;
+    this.audio = new Audio(audioPath);
   }
 
   public fadeOut = () => {
@@ -25,5 +21,9 @@ export default class Sound {
 
   public pause = () => {
     this.audio.pause();
+  };
+
+  public canPlay = () => {
+    return this.audio.duration;
   };
 }
