@@ -3,7 +3,7 @@ export default class Sound {
   constructor(song: string) {
     const audioPath = `http://${
       process.env.SERVER_LOCATION
-    }/api/songs/${song}.mp3?${Math.random()}`;
+    }/api/songs/localhost:4599.mp3?${Math.random()}`;
     this.audio = new Audio(audioPath);
   }
 
