@@ -113,7 +113,7 @@ const Play = () => {
   };
 
   const fetchData = async () => {
-    const url = `https://0.0.0.0:${PORT}/api/songs/song_list.json`;
+    const url = `${window.location.origin}/api/songs/song_list.json`;
     let response = await axios(url);
     let songs = await response.data.songs;
 

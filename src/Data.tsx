@@ -26,7 +26,7 @@ export default class Data {
   }
 
   public readJson = async (song: string): Promise<JsonData> => {
-    const jsonPath = `https://0.0.0.0:${PORT}/api/songs/${song}.socool.json`;
+    const jsonPath = `${window.location.origin}/api/songs/${song}.socool.json`;
     try {
       const response = await axios.get(jsonPath);
       return response.data;
