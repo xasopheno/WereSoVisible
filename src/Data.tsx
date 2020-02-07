@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+const PORT = process.env.PORT || 4599;
+
 export interface JsonData {
   ops: Point[];
   length: number;
@@ -24,7 +26,7 @@ export default class Data {
   }
 
   public readJson = async (song: string): Promise<JsonData> => {
-    const jsonPath = `http://0.0.0.0:8000/api/songs/${song}.socool.json`;
+    const jsonPath = `https://0.0.0.0:${PORT}/api/songs/${song}.socool.json`;
     try {
       const response = await axios.get(jsonPath);
       return response.data;

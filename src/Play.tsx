@@ -7,6 +7,8 @@ import axios from 'axios';
 import Data, { Point, JsonData } from './Data';
 import Sound from './Sound';
 
+const PORT = process.env.PORT || 4599;
+
 const Title = styled.h1`
   color: #454;
   font-size: 1.5em;
@@ -111,7 +113,7 @@ const Play = () => {
   };
 
   const fetchData = async () => {
-    const url = `http://${process.env.SERVER_LOCATION}/api/songs/song_list.json`;
+    const url = `https://0.0.0.0:${PORT}/api/songs/song_list.json`;
     let response = await axios(url);
     let songs = await response.data.songs;
 

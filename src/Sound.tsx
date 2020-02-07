@@ -1,7 +1,9 @@
+const PORT = process.env.PORT || 4599;
+
 export default class Sound {
   private audio!: HTMLAudioElement;
   constructor(song: string) {
-    const audioPath = `http://0.0.0.0:8000/api/songs/${song}.mp3?${Math.random()}`;
+    const audioPath = `https://0.0.0.0:${PORT}/api/songs/${song}.mp3?${Math.random()}`;
     this.audio = new Audio(audioPath);
   }
 
