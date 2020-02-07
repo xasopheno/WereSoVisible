@@ -1,9 +1,9 @@
-const PORT = process.env.PORT || 4599;
+import Settings from './settings';
 
 export default class Sound {
   private audio!: HTMLAudioElement;
   constructor(song: string) {
-    const audioPath = `${window.location.origin}/api/songs/${song}.mp3?${Math.random()}`;
+    const audioPath = `${Settings.backend}/songs/${song}.mp3?${Math.random()}`;
     this.audio = new Audio(audioPath);
   }
 

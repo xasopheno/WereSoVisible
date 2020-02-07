@@ -6,8 +6,9 @@ import styled from 'styled-components';
 import axios from 'axios';
 import Data, { Point, JsonData } from './Data';
 import Sound from './Sound';
+import Settings from './settings';
 
-const PORT = process.env.PORT || 4599;
+console.log(Settings.backend);
 
 const Title = styled.h1`
   color: #454;
@@ -67,14 +68,6 @@ function songSelect(
   }
 }
 
-function getData(song: string): JsonData {
-  //const audio = new Sound(song);
-  const data = { ops: [], length: 0 };
-  //const json = data.getData(song);
-  //return audio, json;
-  return data;
-}
-
 const Play = () => {
   let { id } = useParams();
   if (!id) id = '';
@@ -113,7 +106,7 @@ const Play = () => {
   };
 
   const fetchData = async () => {
-    const url = `${window.location.origin}/api/songs/song_list.json`;
+    const url = `${Settings.backend}/songs/song_list.json`;
     let response = await axios(url);
     let songs = await response.data.songs;
 

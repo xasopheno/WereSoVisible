@@ -1,6 +1,5 @@
 import axios from 'axios';
-
-const PORT = process.env.PORT || 4599;
+import Settings from './settings';
 
 export interface JsonData {
   ops: Point[];
@@ -26,7 +25,7 @@ export default class Data {
   }
 
   public readJson = async (song: string): Promise<JsonData> => {
-    const jsonPath = `${window.location.origin}/api/songs/${song}.socool.json`;
+    const jsonPath = `${Settings.backend}/songs/${song}.socool.json`;
     try {
       const response = await axios.get(jsonPath);
       return response.data;
