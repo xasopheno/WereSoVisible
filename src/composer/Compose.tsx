@@ -23,7 +23,8 @@ import 'ace-builds/src-noconflict/mode-elixir';
 import 'ace-builds/src-noconflict/theme-github';
 import 'ace-builds/src-noconflict/keybinding-vim';
 
-const BACKEND_RENDER_URL = `http://${process.env.SERVER_LOCATION}/api/render`;
+//const BACKEND_RENDER_URL = `http://${process.env.SERVER_LOCATION}/api/render`;
+const BACKEND_RENDER_URL = `http://0.0.0.0:8000/api/render`;
 const customMode = new WSCMode();
 
 const audioCtx = new AudioContext();

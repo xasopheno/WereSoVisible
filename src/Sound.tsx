@@ -1,9 +1,7 @@
 export default class Sound {
   private audio!: HTMLAudioElement;
   constructor(song: string) {
-    const audioPath = `http://${
-      process.env.SERVER_LOCATION
-    }/api/songs/localhost:4599.mp3?${Math.random()}`;
+    const audioPath = `http://0.0.0.0:8000/api/songs/${song}.mp3?${Math.random()}`;
     this.audio = new Audio(audioPath);
   }
 
