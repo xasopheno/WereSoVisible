@@ -24,7 +24,7 @@ import 'ace-builds/src-noconflict/mode-elixir';
 import 'ace-builds/src-noconflict/theme-github';
 import 'ace-builds/src-noconflict/keybinding-vim';
 
-const BACKEND_RENDER_URL = `${Settings.backend}/api/render`;
+const BACKEND_RENDER_URL = `${Settings.backend}/render`;
 const customMode = new WSCMode();
 
 const audioCtx = new AudioContext();
