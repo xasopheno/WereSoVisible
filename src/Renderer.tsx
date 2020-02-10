@@ -8,7 +8,6 @@ import Sound from './Sound';
 import Start from './Start';
 const Controls = require('three-orbit-controls')(THREE);
 
-
 interface State {
   ready: boolean;
   play: boolean;
@@ -22,7 +21,6 @@ interface Props {
 const timeMul = 150;
 const lengthMul = 50;
 const timeOffset = 1100;
-
 
 export default class Renderer extends React.Component<Props, State> {
   private static calculateXPos(x: number): number {
@@ -77,17 +75,19 @@ export default class Renderer extends React.Component<Props, State> {
   }
 
   public startAnimation = async () => {
-    this.t = Date.now();
-    if (this.audio) {
-      await this.audio.play();
-    }
-    this.animate();
-    const last = this.data.events[this.data.events.length - 1];
-    this.tweenCamera(this.camera, this.controls, last.t, last.l);
-    this.setState({
-      ...this.state,
-      play: true,
-    });
+    try {
+      this.t = Date.now();
+      if (this.audio) {
+        await this.audio.play();
+      }
+      this.animate();
+      const last = this.data.events[this.data.events.length - 1];
+      this.tweenCamera(this.camera, this.controls, last.t, last.l);
+      this.setState({
+        ...this.state,
+        play: true,
+      });
+    } catch (err) {}
   };
 
   public async componentDidMount() {
@@ -105,7 +105,7 @@ export default class Renderer extends React.Component<Props, State> {
     });
     await this.getData(this.props.song);
     if (this.props.autoplay === true) {
-        this.startAnimation();
+      this.startAnimation();
     }
   }
 
@@ -126,7 +126,7 @@ export default class Renderer extends React.Component<Props, State> {
     });
   }
 
-  public componentWillUpdate() {
+  public componentDidUpdate() {
     const width = window.innerWidth;
     const height = window.innerHeight;
 

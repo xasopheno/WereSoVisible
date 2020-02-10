@@ -1,7 +1,10 @@
+import Settings from './settings';
+
 export default class Sound {
   private audio!: HTMLAudioElement;
   constructor(song: string) {
-    this.audio = new Audio(`/songs/${song}.mp3?${Math.random()}`);
+    const audioPath = `${Settings.backend}/songs/${song}.mp3?${Math.random()}`;
+    this.audio = new Audio(audioPath);
   }
 
   public fadeOut = () => {
@@ -12,13 +15,15 @@ export default class Sound {
       this.audio.pause();
     }
   };
-  public play = async () => {
-    await this.audio.play();
+  public play = () => {
+    this.audio.play();
   };
 
-  public pause = async () => {
-    await this.audio.pause();
+  public pause = () => {
+    this.audio.pause();
+  };
+
+  public canPlay = () => {
+    return this.audio.duration;
   };
 }
-
-
