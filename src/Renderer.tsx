@@ -11,6 +11,7 @@ const Controls = require('three-orbit-controls')(THREE);
 interface State {
   ready: boolean;
   play: boolean;
+  objects: Array<string>;
 }
 
 interface Props {
@@ -54,6 +55,7 @@ export default class Renderer extends React.Component<Props, State> {
     this.state = {
       play: false,
       ready: false,
+      objects: [],
     }!;
   }
 
@@ -168,6 +170,7 @@ export default class Renderer extends React.Component<Props, State> {
 
     this.render();
     this.controls.update();
+    this.removeCells();
 
     this.renderer.render(this.scene, this.camera);
     this.id = requestAnimationFrame(this.animate.bind(this));
@@ -189,14 +192,31 @@ export default class Renderer extends React.Component<Props, State> {
   public renderPoints = () => {
     const currentTime = (Date.now() - this.t) / 1000;
     const points = this.data.getPoints(currentTime);
+    let objects = [];
     for (const point of points) {
       if (this.data.events.length > 0) {
-        let object;
-        object = this.createObject(point);
+        let object = this.createObject(point);
+
+        objects.push(object.uuid);
         this.scene.add(object);
       }
     }
+    this.setState({ objects: this.state.objects.concat(objects) });
   };
+
+  public removeCells() {
+    if (this.state.objects.length > 10000) {
+      this.state.objects.slice(0, 10).map(i => {
+        const object = this.scene.getObjectByProperty('uuid', i);
+        if (object) {
+          this.scene.remove(object);
+        }
+      });
+      this.setState({
+        objects: this.state.objects.slice(10, this.state.objects.length),
+      });
+    }
+  }
 
   public createObject(point: Point): THREE.Mesh {
     const ta = 3.0;
@@ -211,7 +231,7 @@ export default class Renderer extends React.Component<Props, State> {
       uniforms,
       vertexShader: vertexShader(),
     });
-    // const material = new THREE.MeshLambertMaterial({ color: (point.voice / 50) * 0xffffff });
+    //const material = new THREE.MeshLambertMaterial({ color: (point.voice / 50) * 0xffffff });
     const object = new THREE.Mesh(this.geometry, material);
 
     const time = point.t * timeMul - timeOffset + point.l * lengthMul;
@@ -224,6 +244,7 @@ export default class Renderer extends React.Component<Props, State> {
     object.scale.y = 0.00001;
     object.scale.z = 0.00001;
     this.tweenObject(object, point.l, time, scale);
+
     return object;
   }
 
