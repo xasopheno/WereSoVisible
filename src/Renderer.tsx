@@ -19,7 +19,7 @@ interface Props {
   autoplay: boolean;
 }
 
-const timeMul = 150;
+const timeMul = 100;
 const lengthMul = 50;
 const timeOffset = 1100;
 
@@ -83,8 +83,8 @@ export default class Renderer extends React.Component<Props, State> {
         await this.audio.play();
       }
       this.animate();
-      const last = this.data.events[this.data.events.length - 1];
-      this.tweenCamera(this.camera, this.controls, last.t, last.l);
+      //const last = this.data.events[this.data.events.length - 1];
+      //this.tweenCamera(this.camera, this.controls, last.t, last.l);
       this.setState({
         ...this.state,
         play: true,
@@ -106,6 +106,7 @@ export default class Renderer extends React.Component<Props, State> {
       }
     });
     await this.getData(this.props.song);
+    console.log(this.data.events[this.data.events.length - 1]);
     if (this.props.autoplay === true) {
       this.startAnimation();
     }
@@ -150,7 +151,7 @@ export default class Renderer extends React.Component<Props, State> {
     this.controls = new Controls(this.camera, this.container);
 
     this.camera.lookAt(this.scene.position);
-    this.camera.position.set(0, 0, 0);
+    this.camera.position.set(0, 0, 2000);
     this.controls.update();
 
     this.geometry = new THREE.BoxBufferGeometry(20, 20, 20);
@@ -170,7 +171,7 @@ export default class Renderer extends React.Component<Props, State> {
 
     this.render();
     this.controls.update();
-    this.removeCells();
+    //this.removeCells();
 
     this.renderer.render(this.scene, this.camera);
     this.id = requestAnimationFrame(this.animate.bind(this));
@@ -205,15 +206,15 @@ export default class Renderer extends React.Component<Props, State> {
   };
 
   public removeCells() {
-    if (this.state.objects.length > 10000) {
-      this.state.objects.slice(0, 10).map(i => {
+    if (this.state.objects.length > 100) {
+      this.state.objects.slice(0, 100).map(i => {
         const object = this.scene.getObjectByProperty('uuid', i);
         if (object) {
           this.scene.remove(object);
         }
       });
       this.setState({
-        objects: this.state.objects.slice(10, this.state.objects.length),
+        objects: this.state.objects.slice(1, this.state.objects.length),
       });
     }
   }
@@ -234,7 +235,7 @@ export default class Renderer extends React.Component<Props, State> {
     //const material = new THREE.MeshLambertMaterial({ color: (point.voice / 50) * 0xffffff });
     const object = new THREE.Mesh(this.geometry, material);
 
-    const time = point.t * timeMul - timeOffset + point.l * lengthMul;
+    const time = point.t * timeMul + point.l * lengthMul;
     const scale = Math.exp(point.z);
     object.position.x = Renderer.calculateXPos(point.x);
     object.position.y = Renderer.calculateYPos(point.y);
@@ -243,7 +244,7 @@ export default class Renderer extends React.Component<Props, State> {
     object.scale.x = 0.00001;
     object.scale.y = 0.00001;
     object.scale.z = 0.00001;
-    this.tweenObject(object, point.l, time, scale);
+    this.tweenObject(object, point.l, point.t, scale);
 
     return object;
   }
@@ -258,7 +259,7 @@ export default class Renderer extends React.Component<Props, State> {
         {
           position: 0,
           scale: 1,
-          scale_z: l * 7,
+          scale_z: l * 20,
         },
         l * 1000
       )
@@ -270,22 +271,37 @@ export default class Renderer extends React.Component<Props, State> {
         o.position.z = t - this._object.position + l * 2;
       })
       .start();
-  }
 
-  public tweenCamera = (camera: THREE.PerspectiveCamera, controls: any, t: number, l: number) => {
+    let x = 1000;
     new TWEEN.Tween({
       position: 0,
     })
       .to(
         {
-          position: this.data.length * timeMul,
+          position: this.data.length * -x - t * -x,
         },
-        this.data.length * 1000
+        this.data.length * x - t * x
       )
       .onUpdate(function(this: any) {
-        camera.position.z = this._object.position + timeOffset;
-        controls.target.z = this._object.position;
+        o.position.z = this._object.position;
       })
       .start();
-  };
+  }
+
+  //public tweenCamera = (camera: THREE.PerspectiveCamera, controls: any, t: number, l: number) => {
+  //new TWEEN.Tween({
+  //position: 0,
+  //})
+  //.to(
+  //{
+  //position: this.data.length * timeMul,
+  //},
+  //this.data.length * 1000
+  //)
+  //.onUpdate(function(this: any) {
+  //camera.position.z = this._object.position + timeOffset;
+  //controls.target.z = this._object.position;
+  //})
+  //.start();
+  //};
 }
