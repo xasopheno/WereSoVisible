@@ -83,8 +83,6 @@ export default class Renderer extends React.Component<Props, State> {
         await this.audio.play();
       }
       this.animate();
-      //const last = this.data.events[this.data.events.length - 1];
-      //this.tweenCamera(this.camera, this.controls, last.t, last.l);
       this.setState({
         ...this.state,
         play: true,
@@ -287,21 +285,4 @@ export default class Renderer extends React.Component<Props, State> {
       })
       .start();
   }
-
-  //public tweenCamera = (camera: THREE.PerspectiveCamera, controls: any, t: number, l: number) => {
-  //new TWEEN.Tween({
-  //position: 0,
-  //})
-  //.to(
-  //{
-  //position: this.data.length * timeMul,
-  //},
-  //this.data.length * 1000
-  //)
-  //.onUpdate(function(this: any) {
-  //camera.position.z = this._object.position + timeOffset;
-  //controls.target.z = this._object.position;
-  //})
-  //.start();
-  //};
 }
