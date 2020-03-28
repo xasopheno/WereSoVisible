@@ -11,6 +11,7 @@ const Controls = require('three-orbit-controls')(THREE);
 interface State {
   ready: boolean;
   play: boolean;
+  objects: Array<string>;
 }
 
 interface Props {
@@ -18,7 +19,7 @@ interface Props {
   autoplay: boolean;
 }
 
-const timeMul = 150;
+const timeMul = 100;
 const lengthMul = 50;
 const timeOffset = 1100;
 
@@ -54,6 +55,7 @@ export default class Renderer extends React.Component<Props, State> {
     this.state = {
       play: false,
       ready: false,
+      objects: [],
     }!;
   }
 
@@ -81,8 +83,6 @@ export default class Renderer extends React.Component<Props, State> {
         await this.audio.play();
       }
       this.animate();
-      const last = this.data.events[this.data.events.length - 1];
-      this.tweenCamera(this.camera, this.controls, last.t, last.l);
       this.setState({
         ...this.state,
         play: true,
@@ -104,6 +104,7 @@ export default class Renderer extends React.Component<Props, State> {
       }
     });
     await this.getData(this.props.song);
+    console.log(this.data.events[this.data.events.length - 1]);
     if (this.props.autoplay === true) {
       this.startAnimation();
     }
@@ -148,7 +149,7 @@ export default class Renderer extends React.Component<Props, State> {
     this.controls = new Controls(this.camera, this.container);
 
     this.camera.lookAt(this.scene.position);
-    this.camera.position.set(0, 0, 0);
+    this.camera.position.set(0, 0, 2000);
     this.controls.update();
 
     this.geometry = new THREE.BoxBufferGeometry(20, 20, 20);
@@ -168,6 +169,7 @@ export default class Renderer extends React.Component<Props, State> {
 
     this.render();
     this.controls.update();
+    //this.removeCells();
 
     this.renderer.render(this.scene, this.camera);
     this.id = requestAnimationFrame(this.animate.bind(this));
@@ -189,14 +191,31 @@ export default class Renderer extends React.Component<Props, State> {
   public renderPoints = () => {
     const currentTime = (Date.now() - this.t) / 1000;
     const points = this.data.getPoints(currentTime);
+    let objects = [];
     for (const point of points) {
       if (this.data.events.length > 0) {
-        let object;
-        object = this.createObject(point);
+        let object = this.createObject(point);
+
+        objects.push(object.uuid);
         this.scene.add(object);
       }
     }
+    this.setState({ objects: this.state.objects.concat(objects) });
   };
+
+  public removeCells() {
+    if (this.state.objects.length > 100) {
+      this.state.objects.slice(0, 100).map(i => {
+        const object = this.scene.getObjectByProperty('uuid', i);
+        if (object) {
+          this.scene.remove(object);
+        }
+      });
+      this.setState({
+        objects: this.state.objects.slice(1, this.state.objects.length),
+      });
+    }
+  }
 
   public createObject(point: Point): THREE.Mesh {
     const ta = 3.0;
@@ -211,10 +230,10 @@ export default class Renderer extends React.Component<Props, State> {
       uniforms,
       vertexShader: vertexShader(),
     });
-    // const material = new THREE.MeshLambertMaterial({ color: (point.voice / 50) * 0xffffff });
+    //const material = new THREE.MeshLambertMaterial({ color: (point.voice / 50) * 0xffffff });
     const object = new THREE.Mesh(this.geometry, material);
 
-    const time = point.t * timeMul - timeOffset + point.l * lengthMul;
+    const time = point.t * timeMul + point.l * lengthMul;
     const scale = Math.exp(point.z);
     object.position.x = Renderer.calculateXPos(point.x);
     object.position.y = Renderer.calculateYPos(point.y);
@@ -223,7 +242,8 @@ export default class Renderer extends React.Component<Props, State> {
     object.scale.x = 0.00001;
     object.scale.y = 0.00001;
     object.scale.z = 0.00001;
-    this.tweenObject(object, point.l, time, scale);
+    this.tweenObject(object, point.l, point.t, scale);
+
     return object;
   }
 
@@ -237,7 +257,7 @@ export default class Renderer extends React.Component<Props, State> {
         {
           position: 0,
           scale: 1,
-          scale_z: l * 7,
+          scale_z: l * 20,
         },
         l * 1000
       )
@@ -249,22 +269,20 @@ export default class Renderer extends React.Component<Props, State> {
         o.position.z = t - this._object.position + l * 2;
       })
       .start();
-  }
 
-  public tweenCamera = (camera: THREE.PerspectiveCamera, controls: any, t: number, l: number) => {
+    let x = 1000;
     new TWEEN.Tween({
       position: 0,
     })
       .to(
         {
-          position: this.data.length * timeMul,
+          position: this.data.length * -x - t * -x,
         },
-        this.data.length * 1000
+        this.data.length * x - t * x
       )
       .onUpdate(function(this: any) {
-        camera.position.z = this._object.position + timeOffset;
-        controls.target.z = this._object.position;
+        o.position.z = this._object.position;
       })
       .start();
-  };
+  }
 }
